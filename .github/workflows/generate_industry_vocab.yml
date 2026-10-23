@@ -14,7 +14,7 @@ on:
           - 'May Mặc'
           - 'Điện Tử & SMT'
           - 'Đời Sống & Du Lịch'
-          - 'Văn Hóa & Ngày Lễ'
+          - 'Văn Hóa & Lễ Hội'
           - 'Y Tế & Sức Khỏe'
           - 'Logistics & Kho Vận'
           - 'Bán Hàng & Marketing'
@@ -52,7 +52,16 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global core.quotepath false
+          
+          # Đồng bộ code mới nhất từ remote
           git pull origin main --rebase || true
+          
+          # Xóa file Excel cũ trong thư mục data_copy để tránh kẹt commit/xung đột
+          git rm -f scripts/data_copy/*.xlsx || true
+          
+          # Thêm file mới tạo
           git add scripts/data_copy/
+          
+          # Commit và Push
           git commit -m "Auto-generate vocabulary for industry: ${{ inputs.industry_name }} into data_copy" || echo "No changes to commit"
           git push origin main
