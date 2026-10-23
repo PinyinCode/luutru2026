@@ -15,14 +15,15 @@ on:
           - 'Điện Tử & SMT'
           - 'Đời Sống & Du Lịch'
           - 'Văn Hóa & Lễ Hội'
-          - 'Y Tế & Sức Khỏe'
-          - 'Logistics & Kho Vận'
-          - 'Bán Hàng & Marketing'
-          - 'Công Nghệ Cao & AI'
 
 jobs:
   run-generation:
     runs-on: ubuntu-latest
+    
+    # Bổ sung quyền ghi để push code lên repository thành công
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,7 +44,7 @@ jobs:
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           TARGET_INDUSTRY: ${{ inputs.industry_name }}
         run: |
-          python -u generate_large_vocab.py
+          python -u process_vocab.py
 
       - name: Commit and Push new generated file to data_copy
         env:
