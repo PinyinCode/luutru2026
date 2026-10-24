@@ -813,15 +813,73 @@ def build_custom_practice_js():
         }
     }
 
-    buyTokenBtn.addEventListener('click', function() {
-        // ⭐ NẾU CHƯA ĐĂNG NHẬP -> MỞ MODAL ĐĂNG NHẬP
+    buyTokenBtn.addEventListener('click', async function() {
+        // 1. Nếu chưa đăng nhập -> Mở modal đăng nhập
         if (!currentUser) {
             if (typeof openLoginModal === 'function') openLoginModal();
             else alert('Vui lòng đăng nhập để sử dụng tính năng này!');
             return;
         }
-        
-        // Nếu đã đăng nhập (kể cả Admin) -> Mở modal gia hạn/mua token
+
+        // ⭐ 2. NẾU LÀ ADMIN -> YÊU CẦU NHẬP PASS ĐỂ TỰ DUYỆT
+        if (currentUser.role === 'admin') {
+            var amountStr = prompt("Nhập số lượng Token bạn muốn nạp (Ví dụ: 5000):", "5000");
+            if (amountStr === null) return; // Bấm Hủy
+            
+            var amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Số lượng token không hợp lệ!");
+                return;
+            }
+
+            var password = prompt("Nhập MẬT KHẨU DUYỆT để xác nhận nạp " + amount + " token:");
+            if (password === null) return; // Bấm Hủy
+
+            if (!password || password.trim() === "") {
+                alert("Vui lòng nhập mật khẩu!");
+                return;
+            }
+
+            var originalText = buyTokenBtn.innerHTML;
+            buyTokenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang duyệt...';
+            buyTokenBtn.disabled = true;
+
+            try {
+                var apiUrl = SERVER_API_URL.replace('/translate', '/admin/appro':ve-t 'oken');
+                var res = await fetch(apiUrl, {
+                    method: 'POST',
+                   application headers: { 'Content-Type/json' },
+                    body: JSON.stringify({
+                        admin_email: currentUser.email,
+                        target_email: currentUser.email, // Tự nạp cho chính mình
+                        amount: amount,
+                        password: password
+                    })
+                });
+
+                var json = await res.json();
+
+                if (!res.ok) {
+                    alert("❌ Lỗi: " + (json.error || "Không thể duyệt token"));
+                } else {
+                    if (typeof showUserChangedToast === 'function') {
+                        showUserChangedToast('✅ ' + json.message, 'success');
+                    } else {
+                        alert('✅ ' + json.message);
+                    }
+                    // Cập nhật lại số dư token trên giao diện
+                    await refreshTokenFromFirestore();
+                }
+            } catch(e) {
+                alert("Lỗi kết nối Server: " + e.message);
+            } finally {
+                buyTokenBtn.innerHTML = originalText;
+                buyTokenBtn.disabled = false;
+            }
+            return; // Kết thúc xử lý cho Admin
+        }
+
+        // 3. NẾU LÀ USER THƯỜNG -> CHẠY LOGIC CŨ (Mở modal thanh toán)
         if (typeof openRenewalModal === 'function') openRenewalModal();
         else alert('Vui lòng liên hệ Admin để gia hạn tài khoản!');
     });
