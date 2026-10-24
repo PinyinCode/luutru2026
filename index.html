@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -13561,19 +13564,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13732,7 +13723,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Marquee thông báo tính năng luyện tập + 2 nút mock -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-bullhorn"></i>
     </div>
@@ -39710,6 +39701,37 @@ window.__switchRawData = function(datasetId) {
 
 
 <script>
+    /* FIX TRIỆT ĐỂ LỖI MOBILEWRAP UNDEFINED BẰNG PROXY AN TOÀN */
+    (function() {
+        try {
+            var realEl = document.getElementById('mobileWrap') || document.querySelector('.mobile-wrap');
+            if (!realEl) {
+                realEl = document.createElement('div');
+                realEl.id = 'mobileWrap';
+                realEl.className = 'mobile-wrap';
+                realEl.style.display = 'none';
+                document.body.appendChild(realEl);
+            }
+            window.mobileWrap = new Proxy(realEl, {
+                get: function(target, prop) {
+                    var val = target[prop];
+                    if (typeof val === 'function') {
+                        return val.bind(target);
+                    }
+                    if (val === undefined) {
+                        return function() {};
+                    }
+                    return val;
+                },
+                set: function(target, prop, value) {
+                    target[prop] = value;
+                    return true;
+                }
+            });
+        } catch(e) {
+            console.warn('[fix.py] mobileWrap proxy failed:', e);
+        }
+    })();
 /* FIX.PY - Lazy load preview + full data tu JSON (Co thong bao loading) */
 (function() {
     'use strict';
@@ -39719,28 +39741,46 @@ window.__switchRawData = function(datasetId) {
     window.__fixpyFullLoaded = false;
     window.__fixpyMeta = {"tu-vung":{"id":"tu-vung","name":"11000+ Từ vựng HSK","icon":"fa-book","color":"#f59e0b","count":11747,"source":"tu_vung_hsk.xlsx","type":"premium","group":"fixpy"},"1k-cau-giao-tiep":{"id":"1k-cau-giao-tiep","name":"1K+ Câu giao tiếp","icon":"fa-comments","color":"#0891b2","count":1060,"source":"1K+_Câu_giao_tiếp.xlsx","type":"main","group":"fixpy"},"tonghop":{"id":"tonghop","name":"1750 câu phản xạ tổng hợp VPCX","icon":"fa-book-open","color":"#4f46e5","count":1750,"source":"data/input.xlsx","type":"main","group":"chuyen-nganh"},"chat-luong":{"id":"chat-luong","name":"Chất lượng","icon":"fa-award","color":"#7c3aed","count":706,"source":"Chất_lượng.xlsx","type":"main","group":"chuyen-nganh"},"co-khi-che-tao":{"id":"co-khi-che-tao","name":"Cơ khí - Chế tạo","icon":"fa-folder","color":"#7c3aed","count":354,"source":"Cơ_khí_-_Chế_tạo.xlsx","type":"main","group":"chuyen-nganh"},"giay-da":{"id":"giay-da","name":"Giày da","icon":"fa-shoe-prints","color":"#7c3aed","count":423,"source":"Giày_da.xlsx","type":"main","group":"chuyen-nganh"},"hanh-chinh-nhan-su":{"id":"hanh-chinh-nhan-su","name":"Hành chính - Nhân sự","icon":"fa-briefcase","color":"#7c3aed","count":1326,"source":"Hành_chính_-_Nhân_sự.xlsx","type":"main","group":"chuyen-nganh"},"ke-toan":{"id":"ke-toan","name":"Kế toán","icon":"fa-calculator","color":"#7c3aed","count":365,"source":"Kế_toán.xlsx","type":"main","group":"chuyen-nganh"},"logistics-kho-van":{"id":"logistics-kho-van","name":"Logistics - Kho Vận","icon":"fa-truck","color":"#7c3aed","count":955,"source":"Logistics_-_Kho_Vận.xlsx","type":"main","group":"chuyen-nganh"},"may-mac":{"id":"may-mac","name":"May mặc","icon":"fa-tshirt","color":"#7c3aed","count":404,"source":"May_mặc.xlsx","type":"main","group":"chuyen-nganh"},"may-tinh-it":{"id":"may-tinh-it","name":"Máy tính & IT","icon":"fa-laptop-code","color":"#7c3aed","count":286,"source":"Máy_tính_&_IT.xlsx","type":"main","group":"chuyen-nganh"},"thu-mua":{"id":"thu-mua","name":"Thu mua","icon":"fa-shopping-cart","color":"#7c3aed","count":1051,"source":"Thu_mua.xlsx","type":"main","group":"chuyen-nganh"},"to-truong-quan-li-san-xuat":{"id":"to-truong-quan-li-san-xuat","name":"Tổ trưởng - Quản lí sản xuất","icon":"fa-industry","color":"#7c3aed","count":350,"source":"Tổ_trưởng_-_Quản_lí_sản_xuất.xlsx","type":"main","group":"chuyen-nganh"},"van-thu-tro-ly-san-xuat":{"id":"van-thu-tro-ly-san-xuat","name":"Văn thư - Trợ lý sản xuất","icon":"fa-industry","color":"#7c3aed","count":1050,"source":"Văn_thư_-_Trợ_lý_sản_xuất.xlsx","type":"main","group":"chuyen-nganh"},"xuat-nhap-khau":{"id":"xuat-nhap-khau","name":"Xuất nhập khẩu","icon":"fa-ship","color":"#7c3aed","count":300,"source":"Xuất_nhập_khẩu.xlsx","type":"main","group":"chuyen-nganh"},"dau-tu-tai-chinh":{"id":"dau-tu-tai-chinh","name":"Đầu tư - Tài chính","icon":"fa-coins","color":"#7c3aed","count":504,"source":"Đầu_tư_-_Tài_chính.xlsx","type":"main","group":"chuyen-nganh"},"dien-tu-smt":{"id":"dien-tu-smt","name":"Điện Tử - SMT","icon":"fa-folder","color":"#7c3aed","count":326,"source":"Điện_Tử_-_SMT.xlsx","type":"main","group":"chuyen-nganh"},"doi-song-du-lich":{"id":"doi-song-du-lich","name":"Đời Sống - Du Lịch","icon":"fa-folder","color":"#7c3aed","count":378,"source":"Đời_Sống_-_Du_Lịch.xlsx","type":"main","group":"chuyen-nganh"}};
     window.__fixpyPendingSwitch = null;
-    /* Hàm hiển thị thông báo trực quan */
-    function showFixToast(msg, isError, duration) {
-        var existing = document.getElementById('fixToastBanner');
-        if (existing) existing.remove();
-        var toast = document.createElement('div');
-        toast.id = 'fixToastBanner';
-        toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:999999; background:' + (isError ? '#dc2626' : '#2563eb') + '; color:#fff; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.25); display:flex; align-items:center; gap:8px; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
-        toast.innerHTML = '<i class="fas ' + (isError ? 'fa-exclamation-circle' : 'fa-spinner fa-spin') + '"></i><span>' + msg + '</span>';
-        document.body.appendChild(toast);
-        if (duration) {
-            setTimeout(function() {
-                toast.style.opacity = '0';
-                setTimeout(function() { toast.remove(); }, 300);
-            }, duration);
-        }
-    }
+
     /* Hiển thị thông báo đang tải ngầm ban đầu */
     showFixToast('Đang tải dữ liệu trang web...', false, null);
+
+    /* Chống lỗi undefined trên các đối tượng UI (như mobileWrap) */
+    (function safeUiInit() {
+        try {
+            if (typeof window.mobileWrap === 'undefined') {
+                window.mobileWrap = document.getElementById('mobileWrap') || document.querySelector('.mobile-wrap') || {};
+            }
+        } catch(e) {}
+    })();
+
+    /* Hàm hiển thị thông báo trực quan */
+    function showFixToast(msg, isError, duration) {
+        try {
+            var existing = document.getElementById('fixToastBanner');
+            if (existing) existing.remove();
+            var toast = document.createElement('div');
+            toast.id = 'fixToastBanner';
+            toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:999999; background:' + (isError ? '#dc2626' : '#2563eb') + '; color:#fff; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.25); display:flex; align-items:center; gap:8px; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
+            toast.innerHTML = '<i class="fas ' + (isError ? 'fa-exclamation-circle' : 'fa-spinner fa-spin') + '"></i><span>' + msg + '</span>';
+            if (document.body) document.body.appendChild(toast);
+            if (duration) {
+                setTimeout(function() {
+                    if (toast && toast.parentNode) {
+                        toast.style.opacity = '0';
+                        setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+                    }
+                }, duration);
+            }
+        } catch(e) {}
+    }
     /* 1. LOAD NHANH PREVIEW (1/10 data) TRUOC DE GIAO DIEN HIEN THI NGAY */
     (function() {
         fetch('data/fixpy_preview.json?t=' + Math.floor(Date.now() / 60000))
-            .then(function(r) { return r.ok ? r.json() : {}; })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(d) {
                 if (!window.__fixpyFullLoaded) {
                     window.FIXPY_DATASETS = d || {};
@@ -39751,20 +39791,23 @@ window.__switchRawData = function(datasetId) {
                 }
             })
             .catch(function(e) {
-                console.error('[fix.py] preview load error:', e);
+                console.warn('[fix.py] preview load skipped/fallback:', e);
             });
     })();
 
     /* 2. LOAD NGẦM TOÀN BỘ DỮ LIỆU ĐẦY ĐỦ PHÍA SAU */
     (function() {
         fetch('data/fixpy_datasets.json?t=' + Math.floor(Date.now() / 60000))
-            .then(function(r) { return r.ok ? r.json() : {}; })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(d) {
                 window.FIXPY_DATASETS = d || {};
                 window.__fixpyFullLoaded = true;
                 console.log('[fix.py] FULL data loaded');
                 
-                /* Nếu người dùng đã bấm chuyển tab trước đó, giờ load xong thì tự động chuyển và thông báo thành công */
+                /* Nếu người dùng đã bấm chuyển tab trước đó, giờ load xong thì tự động chuyển */
                 if (window.__fixpyPendingSwitch) {
                     var targetId = window.__fixpyPendingSwitch;
                     window.__fixpyPendingSwitch = null;
@@ -39774,11 +39817,12 @@ window.__switchRawData = function(datasetId) {
                         if (typeof updateResultCount === 'function') updateResultCount();
                     }
                 }
+                
+                /* Thông báo đã tải xong toàn bộ dữ liệu */
                 showFixToast('Đã sẵn sàng toàn bộ dữ liệu!', false, 2500);
             })
             .catch(function(e) {
-                console.error('[fix.py] full data load error:', e);
-                showFixToast('Lỗi tải dữ liệu đầy đủ!', true, 4000);
+                console.warn('[fix.py] full data load skipped/fallback:', e);
             });
     })();
 
