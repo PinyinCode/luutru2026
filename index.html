@@ -18019,7 +18019,7 @@ function render(reset) {
             '<div class="card-header">' +
                 '<div class="card-stt">' + sttSafe + '</div>' +
                 '<div class="card-meta">' +
-                    (r.hsk ? '<span class="card-tag hsk">' + escapeHtml(r.hsk) + '</span>' : '') +
+                    (r.hsk && r.subject !== 'Custom' && r.subject !== 'History' ? '<span class="card-tag hsk">' + escapeHtml(r.hsk) + '</span>' : '') +
                     topicTag +
                     subjectTag +
                     excelBadge +
