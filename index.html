@@ -13768,6 +13768,95 @@ body.has-floating-group #quickSearchRoot{
 </div>
 
 
+<div class="cp-card" id="cpSection">
+    <div class="cp-header-row">
+        <div class="cp-section-header">
+            <div class="cp-icon-badge" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="cp-title-group">
+                <h3>Trợ Lý Dịch Thuật</h3>
+                <p>Dịch và tạo bài tập cá nhân hóa</p>
+            </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <div class="cp-token-badge" id="cpTokenBadge" title="Bấm để cập nhật số Token mới nhất">
+              <i class="fas fa-bolt"></i> <span id="cpTokenText">Đang tải...</span>
+              <span class="refresh-hint">🔄</span>
+            </div>
+            <button class="cp-btn-reset" id="cpHistoryBtn" type="button" title="Xem lịch sử">
+                <i class="fas fa-clock-rotate-left"></i>
+            </button>
+            <button class="cp-btn-reset" id="cpResetBtn" type="button" title="Làm mới">
+                <i class="fas fa-rotate-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="cp-switch-container" id="cpSwitchBtn" title="Đảo chiều dịch">
+        <span class="cp-switch-label active" id="cpLabelVi">Tiếng Việt</span>
+        <div class="cp-switch-icon-box"><i class="fas fa-exchange-alt"></i></div>
+        <span class="cp-switch-label" id="cpLabelZh">Tiếng Trung</span>
+    </div>
+
+    <div class="cp-input-wrapper">
+        <textarea class="cp-textarea" id="cpInputZh" rows="4" placeholder="Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn..."></textarea>
+        <div class="cp-spell-container" id="cpSpellContainer">
+            <div class="cp-spell-header">
+                <i class="fas fa-triangle-exclamation"></i> Phát hiện từ nghi ngờ sai chính tả / dính phím:
+            </div>
+            <div class="cp-spell-chips" id="cpSpellChips"></div>
+        </div>
+        <div class="cp-char-count" id="cpCharCount" style="text-align:right;font-size:.75rem;font-weight:600;color:#64748b;margin-top:4px;">0 / 5000</div>
+    </div>
+
+    <button class="cp-btn-start" id="cpStartBtn" type="button">
+        <i class="fas fa-rocket"></i> Bắt đầu luyện tập
+    </button>
+    <button class="cp-btn-buy-token" id="cpBuyTokenBtn" type="button">
+        <i class="fas fa-shopping-cart"></i> Mua thêm Token
+    </button>
+
+    <div class="cp-progress-wrap" id="cpProgressWrap">
+        <div class="cp-progress-text" id="cpProgressText" style="text-align:center;font-size:.8rem;font-weight:700;">Đang xử lý...</div>
+        <div class="cp-progress-bar-bg"><div class="cp-progress-bar" id="cpProgressBar"></div></div>
+    </div>
+</div>
+
+<div class="cp-modal-overlay" id="cpModalOverlay">
+    <div class="cp-modal-box">
+        <div class="cp-modal-icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <h4 class="cp-modal-title">Phát hiện từ nghi ngờ sai chính tả!</h4>
+        <p class="cp-modal-desc">Hệ thống phát hiện các từ sau có dấu hiệu gõ nhầm hoặc dính phím:</p>
+        <div class="cp-modal-words" id="cpModalWordsList"></div>
+        <p class="cp-modal-desc" style="font-size:0.75rem;">Tiếp tục dịch có thể làm tốn Quota và kết quả không chuẩn xác.</p>
+        <div class="cp-modal-actions">
+            <button class="cp-modal-btn cp-modal-btn-cancel" id="cpModalFixBtn" type="button">Sửa lại văn bản</button>
+            <button class="cp-modal-btn cp-modal-btn-proceed" id="cpModalProceedBtn" type="button">Vẫn tiếp tục dịch</button>
+        </div>
+    </div>
+</div>
+
+<div class="cp-modal-overlay" id="cpHistoryOverlay">
+    <div class="cp-modal-box" style="max-width: 600px; text-align: left;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <div>
+                <h4 class="cp-modal-title" style="font-size: 1.1rem; color: #1e1b4b; margin:0;"><i class="fas fa-history"></i> Lịch sử dịch gần đây</h4>
+                <div id="cpHistoryCounter" style="font-size: 0.75rem; color: #64748b; margin-top: 2px; font-weight: 600;">Đang tải bộ đếm...</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button id="cpSelectAllHistoryBtn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Chọn tất cả ra luyện tập">
+                    <i class="fas fa-check-double"></i> Chọn tất cả
+                </button>
+                <button id="cpHistoryCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#64748b;"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div id="cpHistoryList" style="max-height: 400px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+        </div>
+    </div>
+</div>
+
+
 
 <div class="expiry-banner" id="expiryBanner" style="display:none">
     <div class="expiry-banner-icon" id="expiryBannerIcon">
@@ -18123,57 +18212,79 @@ function countSyllables(pinyinWord) {
 
 function splitByPinyin(zh, pinyin) {
     if (!zh) return [];
-    var hanziChars = [];
+    
+    var chars = [];
     for (var i = 0; i < zh.length; i++) {
-        var c = zh[i];
-        if (/[\u4e00-\u9fa5]/.test(c)) hanziChars.push(c);
+        if (!/\s/.test(zh[i])) chars.push(zh[i]);
     }
-    if (hanziChars.length === 0) return [];
+    if (chars.length === 0) return [];
 
     if (!pinyin || !pinyin.trim()) {
-        return hanziChars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
+        return chars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
     }
 
-    var normalizedPinyin = pinyin
-        .replace(/[.,!?;:'"()\[\]{}\-~`@#$%^&*+=|\\/<>。，！？、；：""'']/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+    // Tách các từ pinyin theo khoảng trắng ban đầu
+    var rawPinyinWords = pinyin.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+    
+    // --- THUẬT TOÁN TỰ ĐỘNG GỘP TỪ GHÉP THÔNG MINH ---
+    // Tự động gom các từ 1 âm tiết đứng cạnh nhau thành từ ghép 2 âm tiết (trừ các trợ từ đơn độc lập)
+    var pinyinWords = [];
+    var skipParticles = ['de', 'le', 'ne', 'ma', 'ba', 'a', 'shì', 'yǒu']; // Các trợ từ/đại từ có thể đứng riêng
+    
+    for (var i = 0; i < rawPinyinWords.length; i++) {
+        var curr = rawPinyinWords[i];
+        var cleanCurr = curr.replace(/[^a-zA-Züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, '').toLowerCase();
+        var currSyllables = countSyllables(cleanCurr);
+        
+        // Nếu từ hiện tại là 1 âm tiết và từ kế tiếp cũng là 1 âm tiết -> Gộp lại thành 1 từ ghép
+        if (currSyllables === 1 && i + 1 < rawPinyinWords.length) {
+            var next = rawPinyinWords[i + 1];
+            var cleanNext = next.replace(/[^a-zA-Züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, '').toLowerCase();
+            var nextSyllables = countSyllables(cleanNext);
+            
+            if (nextSyllables === 1 && skipParticles.indexOf(cleanCurr) === -1 && skipParticles.indexOf(cleanNext) === -1) {
+                // Gộp thành một cặp từ Pinyin liền mạch
+                pinyinWords.push(curr + ' ' + next);
+                i++; // Bỏ qua từ tiếp theo vì đã được gộp vào cặp
+                continue;
+            }
+        }
+        pinyinWords.push(curr);
+    }
 
-    var pinyinWords = normalizedPinyin.split(/\s+/).filter(function(w) { return w.length > 0; });
     var syllableCounts = pinyinWords.map(function(w) { return countSyllables(w); });
-    var totalSyllables = syllableCounts.reduce(function(a, b) { return a + b; }, 0);
+    var result = [];
+    var charIdx = 0;
 
-    if (totalSyllables === hanziChars.length) {
-        var result = [];
-        var charIdx = 0;
-        for (var j = 0; j < syllableCounts.length; j++) {
-            var cnt = syllableCounts[j];
-            if (cnt <= 0) continue;
-            var phrase = hanziChars.slice(charIdx, charIdx + cnt).join('');
-            if (phrase) {
-                result.push({
-                    text: phrase,
-                    type: 'phrase',
-                    pinyin: pinyinWords[j] || ''
-                });
-            }
-            charIdx += cnt;
+    for (var j = 0; j < pinyinWords.length; j++) {
+        var py = pinyinWords[j];
+        var cnt = syllableCounts[j];
+        if (cnt <= 0) cnt = 1;
+
+        if (charIdx >= chars.length) break;
+
+        var phrase = chars.slice(charIdx, charIdx + cnt).join('');
+        if (phrase) {
+            result.push({
+                text: phrase,
+                type: 'phrase',
+                pinyin: py
+            });
         }
-        if (charIdx < hanziChars.length) {
-            var remaining = hanziChars.slice(charIdx).join('');
-            if (result.length > 0) {
-                result[result.length - 1].text += remaining;
-                if (charIdx < pinyinWords.length) {
-                    result[result.length - 1].pinyin += ' ' + pinyinWords.slice(charIdx).join(' ');
-                }
-            } else {
-                result.push({ text: remaining, type: 'single', pinyin: '' });
-            }
-        }
-        return result;
+        charIdx += cnt;
     }
 
-    return hanziChars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
+    // Xử lý phần ký tự thừa nếu có ở cuối câu
+    if (charIdx < chars.length) {
+        var remaining = chars.slice(charIdx).join('');
+        if (result.length > 0) {
+            result[result.length - 1].text += remaining;
+        } else {
+            result.push({ text: remaining, type: 'single', pinyin: '' });
+        }
+    }
+
+    return result;
 }
 
 function updateInlinePreview(input, answer) {
