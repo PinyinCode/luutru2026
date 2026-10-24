@@ -731,7 +731,7 @@ def build_custom_practice_js():
             return; // Dừng ngay, không chạy xuống phần tính toán token
         }
 
-        // ⭐ XỬ LÝ CHO ADMIN / PREMIUM
+        // ⭐ XỬ LÝ CHO SUPER ADMIN / PREMIUM
         if (currentUser.role === 'super_admin' || currentUser.isPermanent) {
             tokenText.textContent = 'Không giới hạn';
             tokenBadge.className = 'cp-token-badge';
@@ -746,7 +746,7 @@ def build_custom_practice_js():
             return;
         }
 
-        // ⭐ TÍNH TOÁN TOKEN CHO USER THƯỜNG
+        // ⭐ TÍNH TOÁN TOKEN
         var totalAvailable = myTokenQuota + myBonusTokens;
         var remain = totalAvailable - myTokensUsed;
         if (remain < 0) remain = 0;
@@ -796,8 +796,8 @@ def build_custom_practice_js():
         if (remain <= 2000) tokenBadge.classList.add('danger');
         else if (remain <= 5000) tokenBadge.classList.add('warn');
 
-        // ⭐ KIỂM TRA SỐ DƯ TOKEN
-        if (remain <= 0 && currentUser.role !== 'admin') {
+        // ⭐ KIỂM TRA SỐ DƯ TOKEN (Đã xóa điều kiện role admin)
+        if (remain <= 0) {
             startBtn.classList.add('cp-hidden');
             buyTokenBtn.classList.remove('cp-hidden');
             buyTokenBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Mua thêm Token';
@@ -821,7 +821,7 @@ def build_custom_practice_js():
             return;
         }
         
-        // Nếu đã đăng nhập -> Mở modal gia hạn
+        // Nếu đã đăng nhập (kể cả Admin) -> Mở modal gia hạn/mua token
         if (typeof openRenewalModal === 'function') openRenewalModal();
         else alert('Vui lòng liên hệ Admin để gia hạn tài khoản!');
     });
