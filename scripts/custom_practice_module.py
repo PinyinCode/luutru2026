@@ -1179,10 +1179,15 @@ def build_custom_practice_js():
         if (isUserAdmin) {
             historyCounter.innerHTML = '<span style="color:#059669; font-weight:700;"><i class="fas fa-shield-halved"></i> Admin: Không giới hạn Read/Save</span>';
         } else {
-            var saveRemain = 100 - currentTodayCount;
+            // ⭐ Sửa giới hạn Lưu thành 150
+            var saveRemain = 150 - currentTodayCount; 
             if (saveRemain < 0) saveRemain = 0;
-            var readRemainText = (typeof currentReadRemain !== 'undefined') ? currentReadRemain : 100;
-            historyCounter.innerHTML = '📖 Lượt xem hôm nay: <b style="color:' + (readRemainText > 0 ? '#4f46e5' : '#dc2626') + ';">' + readRemainText + '</b>/100 | ⏳ Đã lưu: <b>' + currentTodayCount + '</b>/100';
+            
+            // ⭐ Sửa giới hạn Đọc mặc định thành 250
+            var readRemainText = (typeof currentReadRemain !== 'undefined') ? currentReadRemain : 250; 
+            
+            // ⭐ Cập nhật chữ hiển thị: /250 cho lượt đọc và /150 cho lượt lưu
+            historyCounter.innerHTML = '📖 Lượt xem hôm nay: <b style="color:' + (readRemainText > 0 ? '#4f46e5' : '#dc2626') + ';">' + readRemainText + '</b>/250 | ⏳ Đã lưu: <b>' + currentTodayCount + '</b>/150';
         }
     }
 
@@ -1195,33 +1200,31 @@ def build_custom_practice_js():
         
         var html = '';
         cachedHistoryData.forEach(function(item, idx) {
+            // Xử lý thời gian: Ép kiểu về Date (UTC) và để trình duyệt tự đổi sang giờ máy
+            var timeDisplay = item.createdAt || '';
+            if (timeDisplay) {
+                try {
+                    var d = new Date(timeDisplay.replace(' ', 'T') + 'Z'); 
+                    if (!isNaN(d.getTime())) {
+                        var yyyy = d.getFullYear();
+                        var mm = String(d.getMonth() + 1).padStart(2, '0');
+                        var dd = String(d.getDate()).padStart(2, '0');
+                        var hh = String(d.getHours()).padStart(2, '0');
+                        var min = String(d.getMinutes()).padStart(2, '0');
+                        var ss = String(d.getSeconds()).padStart(2, '0');
+                        timeDisplay = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
+                    }
+                } catch(e) {
+                    // Nếu lỗi thì giữ nguyên chuỗi gốc
+                }
+            }
+
             html += '<div class="cp-history-item" style="position:relative;" id="cp-hist-' + (item.id || idx) + '">' +
                 '<div class="cp-history-vi">' + (item.text_vi || '') + '</div>' +
                 '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
                 (item.pinyin ? '<div class="cp-history-pinyin">' + item.pinyin + '</div>' : '') +
                 '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
-                    '<div class="cp-history-time">' + (function(timeStr) {
-    if (!timeStr) return '';
-    try {
-        // Chuyển đổi chuỗi thời gian từ Server sang đối tượng Date (Server đang trả về giờ UTC)
-        var d = new Date(timeStr.replace(' ', 'T') + 'Z'); 
-        if (isNaN(d.getTime())) return timeStr;
-        
-        // Cộng thêm 7 tiếng để ra giờ Việt Nam
-        d.setHours(d.getHours() + 7);
-        
-        // Format lại thành chuỗi YYYY-MM-DD HH:mm:ss
-        var yyyy = d.getFullYear();
-        var mm = String(d.getMonth() + 1).padStart(2, '0');
-        var dd = String(d.getDate()).padStart(2, '0');
-        var hh = String(d.getHours()).padStart(2, '0');
-        var min = String(d.getMinutes()).padStart(2, '0');
-        var ss = String(d.getSeconds()).padStart(2, '0');
-        return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
-    } catch(e) {
-        return timeStr;
-    }
-})(item.createdAt || '') + '</div>' +
+                    '<div class="cp-history-time">' + timeDisplay + '</div>' +
                     '<div style="display:flex; gap:6px;">' +
                         '<button class="cp-delete-single-history" data-id="' + (item.id || '') + '" data-index="' + idx + '" style="background:#fee2e2; color:#ef4444; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">' +
                             '<i class="fas fa-trash-alt"></i> Xóa' +
@@ -1235,6 +1238,7 @@ def build_custom_practice_js():
         });
         historyList.innerHTML = html;
         
+        // ⭐ GẮN SỰ KIỆN CHO NÚT "LUYỆN TẬP"
         var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -1257,6 +1261,7 @@ def build_custom_practice_js():
             });
         });
 
+        // ⭐ GẮN SỰ KIỆN CHO NÚT "XÓA"
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
             btn.addEventListener('click', async function() {
@@ -1283,7 +1288,6 @@ def build_custom_practice_js():
             });
         });
     }
-
     if (historyBtn) {
         historyBtn.addEventListener('click', async function() {
             if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập để xem lịch sử!'); return; }
