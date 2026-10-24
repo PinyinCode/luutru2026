@@ -1285,7 +1285,7 @@ def build_custom_practice_js():
             var sttNumber = item.stt || (idx + 1);
 
             // ⭐ Bố cục mới: Vòng tròn STT bên trái, nội dung bên phải
-            html += '<div class="cp-history-item" style="position:relative; display:flex; align-items:flex-start; gap:8px;" id="cp-hist-' + (item.id || idx) + '">' +
+            html += '<div class="cp-history-item cp-history-card" style="position:relative; display:flex; align-items:flex-start; gap:8px; cursor:pointer;" data-index="' + idx + '" id="cp-hist-' + (item.id || idx) + '">' +
                 
                 // Vòng tròn đánh số
                 '<div style="display:flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px; box-shadow:0 2px 6px rgba(79,70,229,.3);">' + sttNumber + '</div>' +
@@ -1309,7 +1309,96 @@ def build_custom_practice_js():
             '</div>';
         });
         historyList.innerHTML = html;
-        
+
+        // ⭐ TÍNH NĂNG MỚI: CLICK ĐÚP (PC) HOẶC TAP (MOBILE) ĐỂ LUYỆN TẬP TỪ CÂU ĐÓ ĐẾN CUỐI
+        var cardItems = historyList.querySelectorAll('.cp-history-card');
+        cardItems.forEach(function(card) {
+            var lastTap = 0;
+            var touchStartX = 0;
+            var touchStartY = 0;
+            var touchStartTime = 0;
+
+            // ⭐ 1. XỬ LÝ CHO MOBILE (Phân biệt Tap và Kéo trượt)
+            card.addEventListener('touchstart', function(e) {
+                var touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartTime = Date.now();
+            }, { passive: true });
+
+            card.addEventListener('touchend', function(e) {
+                // Bỏ qua nếu bấm vào nút Xóa hoặc Luyện tập
+                if (e.target.closest('button')) return;
+
+                var touch = e.changedTouches[0];
+                var touchEndX = touch.clientX;
+                var touchEndY = touch.clientY;
+                var touchEndTime = Date.now();
+
+                // Tính toán khoảng cách di chuyển và thời gian
+                var distance = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
+                var duration = touchEndTime - touchStartTime;
+
+                // Điều kiện để coi là TAP (chứ không phải vuốt):
+                // - Di chuyển < 10px
+                // - Thời gian chạm < 300ms
+                if (distance < 10 && duration < 300) {
+                    e.preventDefault(); // Ngăn chặn sự kiện click giả lập của trình duyệt
+                    triggerPracticeFromIndex(this.getAttribute('data-index'));
+                }
+            });
+
+            // ⭐ 2. XỬ LÝ CHO PC (Click đúp)
+            card.addEventListener('click', function(e) {
+                // Bỏ qua nếu bấm vào nút Xóa hoặc Luyện tập
+                if (e.target.closest('button')) return;
+                
+                // Nếu đang ở thiết bị cảm ứng, bỏ qua sự kiện click này (vì đã xử lý ở touchend)
+                if (e.pointerType === 'touch' || ('ontouchstart' in window)) return;
+
+                var now = Date.now();
+                var timesince = now - lastTap;
+                
+                if (timesince < 300 && timesince > 0) {
+                    // Click đúp
+                    e.preventDefault();
+                    e.stopPropagation();
+                    triggerPracticeFromIndex(this.getAttribute('data-index'));
+                    lastTap = 0;
+                } else {
+                    // Click đơn (chờ xem có click thứ 2 không)
+                    lastTap = now;
+                }
+            });
+        });
+
+        // Hàm xử lý: Load từ câu được chọn đến hết
+        function triggerPracticeFromIndex(indexStr) {
+            var idx = parseInt(indexStr);
+            if (isNaN(idx) || idx < 0) return;
+            
+            // Cắt mảng từ idx đến cuối
+            var slicedData = cachedHistoryData.slice(idx).map(function(item, i) {
+                return {
+                    stt: item.stt || String(i + 1), // Giữ STT gốc
+                    zh: item.text_zh || '',
+                    vi: item.text_vi || '',
+                    pinyin: item.pinyin || '',
+                    hsk: 'HSK1',
+                    topic: 'Lịch sử dịch',
+                    subject: 'History'
+                };
+            });
+
+            if (slicedData.length === 0) return;
+
+            // Đóng modal lịch sử
+            historyOverlay.classList.remove('show');
+            
+            // Load ra trang chính
+            loadDataToPracticeScreen(slicedData);
+        }
+
         // GẮN SỰ KIỆN CHO NÚT "LUYỆN TẬP"
         var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
