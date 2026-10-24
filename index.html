@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -11354,6 +11357,374 @@ html body .tiktok-float-btn > i {
     }
 }
 
+/* CUSTOM PRACTICE */
+
+/* ═══════════════════════════════════════════════════════════ */
+/* KHU VỰC LUYỆN TẬP TỰ DO - MODERN GLASSMORPHIC UI           */
+/* ═══════════════════════════════════════════════════════════ */
+.cp-card {
+    background: linear-gradient(145deg, var(--surface, #ffffff), var(--surface-2, #f8fafc));
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    border-radius: 24px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 16px 40px -12px rgba(124, 58, 237, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+.cp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899);
+}
+.cp-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+.cp-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.cp-icon-badge {
+    color: #fff;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    box-shadow: 0 6px 16px rgba(168, 85, 247, 0.35);
+}
+.cp-title-group h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text, #1e1b4b);
+    margin: 0;
+}
+.cp-title-group p {
+    font-size: 0.8rem;
+    color: var(--text-3, #64748b);
+    margin: 2px 0 0 0;
+}
+
+.cp-token-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(16, 185, 129, 0.1); color: #059669;
+    padding: 4px 12px; border-radius: 50px;
+    font-size: 0.75rem; font-weight: 800;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    transition: all 0.3s;
+}
+.cp-token-badge.warn { background: rgba(245, 158, 11, 0.1); color: #d97706; border-color: rgba(245, 158, 11, 0.2); }
+.cp-token-badge.danger { background: rgba(220, 38, 38, 0.1); color: #dc2626; border-color: rgba(220, 38, 38, 0.2); }
+
+.cp-btn-reset {
+    padding: 0.45rem 0.9rem;
+    border-radius: 50px;
+    border: 1px solid var(--border, #e2e8f0);
+    background: var(--surface, #ffffff);
+    color: var(--text-3, #64748b);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.cp-btn-reset:hover { background: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+
+.cp-switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-2, #f1f5f9);
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid var(--border, #e2e8f0);
+    cursor: pointer;
+    user-select: none;
+    width: 100%;
+    max-width: 320px; /* ⭐ Thêm dòng này để giới hạn chiều rộng */
+    margin: 0 auto;   /* ⭐ Thêm dòng này để căn giữa */
+}
+.cp-switch-label {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-3, #64748b);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.cp-switch-label.active {
+    background: var(--surface, #ffffff);
+    color: #7c3aed;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.cp-switch-icon-box {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.cp-switch-container:hover .cp-switch-icon-box {
+    transform: rotate(180deg);
+}
+
+.cp-textarea {
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 16px;
+    border: 1.5px solid var(--border, #e2e8f0);
+    background: var(--surface, #ffffff);
+    color: var(--text, #1e1b4b);
+    font-family: var(--font-zh, inherit);
+    font-size: 1.05rem;
+    resize: none;
+    min-height: 120px;
+    max-height: 400px;
+    line-height: 1.6;
+    transition: all 0.25s ease;
+}
+.cp-textarea:focus {
+    border-color: #a855f7;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+}
+
+.cp-spell-container {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #92400e;
+    margin-top: 6px;
+    animation: fadeIn 0.3s ease;
+}
+.cp-spell-container.show { display: flex; }
+.cp-spell-header {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.cp-spell-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.cp-spell-chip {
+    background: #ffffff;
+    border: 1px solid #f59e0b;
+    color: #b45309;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* ⭐ MODAL POPUP CẢNH BÁO TÙY CHỈNH (GLASSMORPHISM) */
+.cp-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+}
+.cp-modal-overlay.show { display: flex; }
+.cp-modal-box {
+    background: var(--surface, #ffffff);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 20px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+}
+.cp-modal-icon {
+    font-size: 2.5rem;
+    color: #f59e0b;
+}
+.cp-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text, #1e1b4b);
+    margin: 0;
+}
+.cp-modal-desc {
+    font-size: 0.85rem;
+    color: var(--text-3, #64748b);
+    line-height: 1.5;
+    margin: 0;
+}
+.cp-modal-words {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+.cp-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+.cp-modal-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+.cp-modal-btn-cancel {
+    background: var(--surface-2, #f1f5f9);
+    color: var(--text-3, #64748b);
+}
+.cp-modal-btn-cancel:hover { background: #e2e8f0; }
+.cp-modal-btn-proceed {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+.cp-modal-btn-proceed:hover { opacity: 0.9; }
+
+.cp-btn-start {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+.cp-btn-start:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.5);
+}
+.cp-btn-start:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cp-btn-buy-token {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    border: 2px dashed #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+.cp-btn-buy-token:hover { background: rgba(245, 158, 11, 0.2); }
+
+.cp-progress-wrap {
+    display: none;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--surface-2, #f1f5f9);
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border, #e2e8f0);
+}
+.cp-progress-wrap.show { display: flex; animation: fadeIn 0.3s ease; }
+.cp-progress-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: var(--surface, #ffffff);
+    border-radius: 50px;
+    overflow: hidden;
+}
+.cp-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    transition: width 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.cp-history-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.cp-history-item:hover { border-color: #a855f7; box-shadow: 0 4px 12px rgba(168,85,247,0.1); }
+.cp-history-vi { font-size: 0.9rem; color: #1e293b; font-weight: 600; }
+.cp-history-zh { font-size: 1.05rem; color: #7c3aed; font-weight: 700; }
+.cp-history-pinyin { font-size: 0.8rem; color: #64748b; font-style: italic; }
+.cp-history-time { font-size: 0.7rem; color: #94a3b8; text-align: right; margin-top: 4px; }
+
+@media (min-width: 768px) {
+    .cp-btn-start, .cp-btn-buy-token { width: auto; min-width: 280px; align-self: flex-end; }
+}
+/* ⭐ TRẠNG THÁI COOLDOWN CHO Ô TOKEN */
+.cp-token-badge.cooldown {
+    background: rgba(100, 116, 139, 0.15) !important;
+    color: #64748b !important;
+    border-color: rgba(100, 116, 139, 0.3) !important;
+    cursor: not-allowed !important;
+}
+.cp-token-badge.cooldown:hover {
+    transform: none;
+    box-shadow: none;
+}
+.cp-token-badge.cooldown .refresh-hint {
+    display: none;
+}
+
 
 /* FIX.PY: AUTO-FIT LAYOUT */
 @media (max-width: 768px) {
@@ -13191,19 +13562,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13362,7 +13721,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Marquee thông báo tính năng luyện tập + 2 nút mock -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-bullhorn"></i>
     </div>
@@ -37952,6 +38311,908 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
     };
 
     console.log('[DAM] Module loaded OK — max ' + MAX_ACCOUNTS_PER_DEVICE + ' accounts/device (fingerprint), cooldown ' + COOLDOWN_MINUTES + 'min');
+})();
+
+/* CUSTOM PRACTICE */
+
+(function() {
+    'use strict';
+    var MAX_CHARS = 5000;
+    var currentMode = 'vi2zh';
+    var SERVER_API_URL = 'https://server-vopb.onrender.com/api/translate'; 
+
+    var inputArea = document.getElementById('cpInputZh');
+    var charCount = document.getElementById('cpCharCount');
+    var startBtn = document.getElementById('cpStartBtn');
+    var buyTokenBtn = document.getElementById('cpBuyTokenBtn');
+    var resetBtn = document.getElementById('cpResetBtn');
+    var tokenBadge = document.getElementById('cpTokenBadge');
+    var tokenText = document.getElementById('cpTokenText');
+    
+    var switchBtn = document.getElementById('cpSwitchBtn');
+    var labelZh = document.getElementById('cpLabelZh');
+    var labelVi = document.getElementById('cpLabelVi');
+    
+    var progressWrap = document.getElementById('cpProgressWrap');
+    var progressBar = document.getElementById('cpProgressBar');
+    var progressText = document.getElementById('cpProgressText');
+
+    var spellContainer = document.getElementById('cpSpellContainer');
+    var spellChips = document.getElementById('cpSpellChips');
+
+    var modalOverlay = document.getElementById('cpModalOverlay');
+    var modalWordsList = document.getElementById('cpModalWordsList');
+    var modalFixBtn = document.getElementById('cpModalFixBtn');
+    var modalProceedBtn = document.getElementById('cpModalProceedBtn');
+
+    var historyBtn = document.getElementById('cpHistoryBtn');
+    var historyOverlay = document.getElementById('cpHistoryOverlay');
+    var historyList = document.getElementById('cpHistoryList');
+    var historyCloseBtn = document.getElementById('cpHistoryCloseBtn');
+    var selectAllHistoryBtn = document.getElementById('cpSelectAllHistoryBtn');
+    var historyCounter = document.getElementById('cpHistoryCounter');
+
+    
+    var myTokensUsed = 0;
+    var myTokenQuota = 20000;
+    var myBonusTokens = 0;
+    var currentUser = null;
+    var resolveModalAction = null;
+    var cachedHistoryData = [];
+    var currentTodayCount = 0;
+    var isUserAdmin = false;
+    var currentReadRemain = 100;
+    
+    // ⭐ BIẾN CHỐNG SPAM TOKEN (Cooldown 60 giây)
+    var TOKEN_REFRESH_COOLDOWN = 60000; // 60 giây
+    var lastTokenRefreshTime = 0;
+    var isTokenRefreshing = false;
+    var cooldownTimerInterval = null;
+    
+    // Khôi phục thời gian cooldown từ lần bấm trước (nếu có)
+    try {
+        var savedTime = parseInt(localStorage.getItem('cp_last_token_refresh') || '0');
+        if (savedTime > 0) lastTokenRefreshTime = savedTime;
+    } catch(e) {}
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadPinyinPro);
+    } else {
+        loadPinyinPro();
+    }
+    // ⭐ Hàm kiểm tra và hiển thị trạng thái Cooldown
+    function updateCooldownUI() {
+        if (!tokenText || !tokenBadge) return;
+        
+        var now = Date.now();
+        var timeSinceLastRefresh = now - lastTokenRefreshTime;
+        
+        // Nếu chưa bấm lần nào, hoặc đã hết cooldown
+        if (lastTokenRefreshTime === 0 || timeSinceLastRefresh >= TOKEN_REFRESH_COOLDOWN) {
+            // Xóa trạng thái cooldown
+            tokenBadge.classList.remove('cooldown');
+            tokenBadge.style.cursor = 'pointer';
+            
+            // Khôi phục text hiển thị token
+            if (currentUser && !isTokenRefreshing) {
+                var totalAvailable = myTokenQuota + myBonusTokens;
+                var remain = totalAvailable - myTokensUsed;
+                if (remain < 0) remain = 0;
+                tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
+            }
+            
+            // Hủy interval nếu có
+            if (cooldownTimerInterval) {
+                clearInterval(cooldownTimerInterval);
+                cooldownTimerInterval = null;
+            }
+            return;
+        }
+        
+        // Đang trong cooldown → hiển thị đếm ngược
+        var remainMs = TOKEN_REFRESH_COOLDOWN - timeSinceLastRefresh;
+        var remainSec = Math.ceil(remainMs / 1000);
+        
+        tokenBadge.classList.add('cooldown');
+        tokenBadge.style.cursor = 'not-allowed';
+        
+        // Nếu đang không trong quá trình refresh thì mới đè text đếm ngược
+        if (!isTokenRefreshing) {
+            tokenText.textContent = '⏳ Đợi ' + remainSec + 's';
+        }
+    }
+
+    // ⭐ Hàm đếm ngược (chạy mỗi giây)
+    function startCooldownTimer() {
+        if (cooldownTimerInterval) clearInterval(cooldownTimerInterval);
+        updateCooldownUI();
+        cooldownTimerInterval = setInterval(updateCooldownUI, 1000);
+    }
+
+    function initTokenState() {
+        var user = null;
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (key && key.indexOf('user_cache_') === 0) {
+                    var cached = JSON.parse(localStorage.getItem(key) || 'null');
+                    if (cached && cached.data && cached.data.email) {
+                        user = cached.data;
+                        break;
+                    }
+                }
+            }
+        } catch(e) {}
+
+        currentUser = user;
+        if (!user) {
+            tokenText.textContent = 'Chưa đăng nhập';
+            tokenBadge.className = 'cp-token-badge warn';
+            startBtn.disabled = true;
+            return;
+        }
+
+        if (user.role === 'super_admin' || user.role === 'admin' || user.isPermanent) {
+            if (user.role === 'admin' || user.role === 'super_admin') {
+                myTokenQuota = 100000;
+            } else {
+                tokenText.textContent = 'Không giới hạn';
+                tokenBadge.className = 'cp-token-badge';
+                return;
+            }
+        } else {
+            myTokenQuota = user.tokenQuota || 20000;
+        }
+
+        myBonusTokens = user.bonusTokens || 0;
+        myTokensUsed = user.tokensUsed || 0;
+
+        // ⭐ KIỂM TRA TRẠNG THÁI HẾT HẠN
+        var isExpired = false;
+        if (user.isExpiredOnly === true || user.tier === 'expired' || user.appTier === 'expired') {
+            isExpired = true;
+        } else if (user.expiryDate) {
+            var expTime = new Date(user.expiryDate).getTime();
+            if (!isNaN(expTime) && expTime < Date.now()) {
+                isExpired = true;
+            }
+        }
+
+        renderTokenUI(isExpired);
+
+        // ⭐ KHÔI PHỤC TRẠNG THÁI COOLDOWN NẾU USER F5 TRANG
+        // (Đọc thời gian bấm gần nhất từ localStorage, nếu còn trong 60s thì đếm tiếp)
+        try {
+            var savedRefreshTime = parseInt(localStorage.getItem('cp_last_token_refresh') || '0');
+            if (savedRefreshTime > 0) {
+                lastTokenRefreshTime = savedRefreshTime;
+                var timePassed = Date.now() - savedRefreshTime;
+                
+                if (timePassed < TOKEN_REFRESH_COOLDOWN) {
+                    // Vẫn đang trong cooldown → Bắt đầu đếm ngược
+                    console.log('[CP] Khôi phục cooldown: còn ' + Math.ceil((TOKEN_REFRESH_COOLDOWN - timePassed) / 1000) + 's');
+                    startCooldownTimer();
+                } else {
+                    // Đã qua 60s → Xóa trạng thái, cho phép bấm lại
+                    lastTokenRefreshTime = 0;
+                    try { localStorage.removeItem('cp_last_token_refresh'); } catch(e) {}
+                }
+            }
+        } catch(e) {
+            console.warn('[CP] Lỗi đọc trạng thái cooldown:', e);
+        }
+    }
+    // ⭐ HÀM LÀM MỚI TOKEN TỪ FIRESTORE (BỔ SUNG)
+    async function refreshTokenFromFirestore() {
+        if (!currentUser || !currentUser.email || typeof db === 'undefined' || !db) {
+            return false;
+        }
+        
+        try {
+            var doc = await db.collection('allowed_users').doc(currentUser.email).get({ source: 'server' });
+            if (!doc.exists) return false;
+            
+            var freshData = doc.data();
+            currentUser.bonusTokens = freshData.bonusTokens || 0;
+            currentUser.tokensUsed = freshData.tokensUsed || 0;
+            currentUser.tokenQuota = freshData.tokenQuota || 20000;
+            currentUser.isPermanent = freshData.isPermanent || false;
+            currentUser.role = freshData.role || currentUser.role;
+            
+            // ⭐ BỔ SUNG: Lấy trạng thái hết hạn mới nhất từ server
+            currentUser.isExpiredOnly = freshData.isExpiredOnly || false;
+            currentUser.tier = freshData.tier || null;
+            currentUser.appTier = freshData.appTier || null;
+            currentUser.expiryDate = freshData.expiryDate || null;
+            
+            myTokenQuota = currentUser.tokenQuota;
+            myBonusTokens = currentUser.bonusTokens;
+            myTokensUsed = currentUser.tokensUsed;
+            
+            // Cập nhật lại cache để các nơi khác dùng
+            try {
+                var cacheKey = 'user_cache_' + currentUser.email;
+                var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                if (cached && cached.data) {
+                    cached.data.bonusTokens = currentUser.bonusTokens;
+                    cached.data.tokensUsed = currentUser.tokensUsed;
+                    cached.data.tokenQuota = currentUser.tokenQuota;
+                    cached.data.isPermanent = currentUser.isPermanent;
+                    // ⭐ Lưu trạng thái hết hạn vào cache
+                    cached.data.isExpiredOnly = currentUser.isExpiredOnly;
+                    cached.data.tier = currentUser.tier;
+                    cached.data.appTier = currentUser.appTier;
+                    cached.data.expiryDate = currentUser.expiryDate;
+                    
+                    localStorage.setItem(cacheKey, JSON.stringify(cached));
+                }
+            } catch(e) {}
+            
+            // ⭐ Tính toán cờ isExpired trước khi render
+            var isExpired = (currentUser.isExpiredOnly === true || currentUser.tier === 'expired' || currentUser.appTier === 'expired');
+            if (currentUser.expiryDate) {
+                var expTime = new Date(currentUser.expiryDate).getTime();
+                if (!isNaN(expTime) && expTime < Date.now()) isExpired = true;
+            }
+            
+            // ⭐ Truyền isExpired vào hàm render
+            renderTokenUI(isExpired);
+            return true;
+        } catch(e) {
+            console.warn('[CP] Refresh token error:', e.message);
+            return false;
+        }
+    }
+
+    function renderTokenUI(isExpired) {
+        if (currentUser && (currentUser.role === 'super_admin' || currentUser.isPermanent)) {
+            tokenText.textContent = 'Không giới hạn';
+            tokenBadge.className = 'cp-token-badge';
+            // Đảm bảo nút refresh mở khóa cho admin
+            tokenBadge.style.pointerEvents = 'auto';
+            tokenBadge.style.opacity = '1';
+            tokenBadge.title = 'Bấm để cập nhật số Token mới nhất';
+            return;
+        }
+
+        var totalAvailable = myTokenQuota + myBonusTokens;
+        var remain = totalAvailable - myTokensUsed;
+        if (remain < 0) remain = 0;
+
+        tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
+        tokenBadge.classList.remove('warn', 'danger');
+        
+        // ⭐ KHÓA NÚT LỊCH SỬ NẾU HẾT HẠN
+        var historyBtnEl = document.getElementById('cpHistoryBtn');
+        if (historyBtnEl) {
+            if (isExpired) {
+                historyBtnEl.disabled = true;
+                historyBtnEl.style.opacity = '0.4';
+                historyBtnEl.style.cursor = 'not-allowed';
+                historyBtnEl.title = 'Tài khoản đã hết hạn - Không thể xem lịch sử';
+                historyBtnEl.innerHTML = '<i class="fas fa-lock"></i>';
+            } else {
+                historyBtnEl.disabled = false;
+                historyBtnEl.style.opacity = '1';
+                historyBtnEl.style.cursor = 'pointer';
+                historyBtnEl.title = 'Xem lịch sử';
+                historyBtnEl.innerHTML = '<i class="fas fa-clock-rotate-left"></i>';
+            }
+        }
+
+        // ⭐ KHÓA NÚT REFRESH TOKEN NẾU HẾT HẠN
+        if (isExpired) {
+            tokenBadge.classList.add('danger'); // Đổi màu đỏ
+            tokenBadge.style.pointerEvents = 'none'; // Chặn click
+            tokenBadge.style.opacity = '0.6';
+            tokenBadge.title = 'Tài khoản đã hết hạn - Không thể làm mới Token';
+            
+            startBtn.style.display = 'none';
+            buyTokenBtn.style.display = 'flex';
+            buyTokenBtn.innerHTML = '<i class="fas fa-crown"></i> Gia hạn ngay (Giữ nguyên Token)';
+            inputArea.disabled = true;
+            inputArea.placeholder = 'Tài khoản đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng Luyện tập tự do.';
+            return; 
+        }
+
+        // Nếu tài khoản bình thường (còn hạn) -> Mở khóa nút Refresh
+        tokenBadge.style.pointerEvents = 'auto';
+        tokenBadge.style.opacity = '1';
+        tokenBadge.title = 'Bấm để cập nhật số Token mới nhất';
+
+        // Xử lý giao diện bình thường
+        if (remain <= 2000) tokenBadge.classList.add('danger');
+        else if (remain <= 5000) tokenBadge.classList.add('warn');
+
+        if (remain <= 0 && currentUser.role !== 'admin') {
+            startBtn.style.display = 'none';
+            buyTokenBtn.style.display = 'flex';
+            buyTokenBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Mua thêm Token';
+            inputArea.disabled = true;
+            inputArea.placeholder = 'Bạn đã hết Token. Vui lòng mua thêm để tiếp tục.';
+        } else {
+            startBtn.style.display = 'flex';
+            buyTokenBtn.style.display = 'none';
+            inputArea.disabled = false;
+            inputArea.placeholder = currentMode === 'vi2zh' ? 'Nhập văn bản tiếng Việt vào đây...' : 'Dán văn bản tiếng Trung vào đây...';
+        }
+    }
+
+    buyTokenBtn.addEventListener('click', function() {
+        if (typeof openRenewalModal === 'function') openRenewalModal();
+        else alert('Vui lòng liên hệ Admin để mua thêm Token!');
+    });
+
+    function autoResizeTextarea() {
+        inputArea.style.height = 'auto';
+        var newHeight = inputArea.scrollHeight;
+        var maxHeight = 400; // Đã sửa lỗi cú pháp 'maxHeight = var 400'
+        if (newHeight > maxHeight) {
+            inputArea.style.height = maxHeight + 'px';
+            inputArea.style.overflowY = 'auto';
+        } else {
+            inputArea.style.height = newHeight + 'px';
+            inputArea.style.overflowY = 'hidden'; // Đã sửa lỗi cú pháp
+        }
+    }
+
+    function findSuspiciousWords() {
+        if (currentMode !== 'vi2zh') return [];
+        var text = inputArea.value;
+        var rawWords = text.split(/\s+/);
+        var suspicious = [];
+        var whitelist = ['tr', 'và', 'của', 'cho', 'với', 'để', 'là', 'có', 'không', 'những', 'các', 'được'];
+
+        for (var i = 0; i < rawWords.length; i++) {
+            var w = rawWords[i].replace(/^[.,!?;:"'()\[\]{}]+|[.,!?;:"'()\[\]{}]+$/g, '');
+            if (!w || w.length < 3) continue;
+            if (whitelist.includes(w.toLowerCase())) continue;
+
+            var wLower = w.toLowerCase();
+            var hasTripleChar = /(.)\1{2,}/.test(wLower);
+            var vowelsRegex = /[aeiouyàáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]/i;
+            var hasVowel = vowelsRegex.test(wLower);
+
+            if (hasTripleChar || (!hasVowel && w.length >= 4)) {
+                if (suspicious.indexOf(w) === -1) suspicious.push(w);
+            }
+        }
+        return suspicious;
+    }
+
+    function checkSpellingSuggestions() {
+        var suspiciousWords = findSuspiciousWords();
+        if (suspiciousWords.length > 0) {
+            spellChips.innerHTML = '';
+            suspiciousWords.forEach(function(word) {
+                var chip = document.createElement('div');
+                chip.className = 'cp-spell-chip';
+                chip.innerHTML = '<i class="fas fa-triangle-exclamation"></i> ' + word;
+                spellChips.appendChild(chip);
+            });
+            spellContainer.classList.add('show');
+        } else {
+            spellContainer.classList.remove('show');
+        }
+    }
+
+    function updateCharCount() {
+        var len = inputArea.value.length;
+        charCount.textContent = len + ' / ' + MAX_CHARS;
+        if (len > MAX_CHARS) {
+            charCount.classList.add('over');
+            inputArea.value = inputArea.value.substring(0, MAX_CHARS);
+            charCount.textContent = MAX_CHARS + ' / ' + MAX_CHARS + ' (Đã cắt)';
+        } else {
+            charCount.classList.remove('over');
+        }
+        autoResizeTextarea();
+        checkSpellingSuggestions();
+    }
+
+    inputArea.addEventListener('input', updateCharCount);
+    setTimeout(updateCharCount, 200);
+
+    switchBtn.addEventListener('click', function() {
+        if (currentMode === 'vi2zh') {
+            currentMode = 'zh2vi';
+            labelVi.classList.remove('active');
+            labelZh.classList.add('active');
+            spellContainer.classList.remove('show');
+            if (!inputArea.disabled) inputArea.placeholder = '输入或粘贴中文文本，让翻译助手帮您搞定...';
+        } else {
+            currentMode = 'vi2zh';
+            labelZh.classList.remove('active');
+            labelVi.classList.add('active');
+            if (!inputArea.disabled) inputArea.placeholder = 'Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn...';
+        }
+        inputArea.value = '';
+        updateCharCount();
+    });
+
+    resetBtn.addEventListener('click', function() {
+        inputArea.value = '';
+        spellContainer.classList.remove('show');
+        updateCharCount();
+        progressWrap.classList.remove('show');
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
+        setTimeout(autoResizeTextarea, 50);
+    });
+
+    function showSpellModal(words) {
+        return new Promise(function(resolve) {
+            modalWordsList.textContent = words.join(', ');
+            modalOverlay.classList.add('show');
+            resolveModalAction = resolve;
+        });
+    }
+
+    modalFixBtn.addEventListener('click', function() {
+        modalOverlay.classList.remove('show');
+        if (resolveModalAction) resolveModalAction(false);
+    });
+
+    modalProceedBtn.addEventListener('click', function() {
+        modalOverlay.classList.remove('show');
+        if (resolveModalAction) resolveModalAction(true);
+    });
+
+    function smartSplit(text, mode) {
+        var protectedText = text.replace(/(\d)\.(\d)/g, '$1__DOT__$2');
+        var rawParts = protectedText.split(/(?<=[.!?。！？\n])/g);
+        var result = [];
+        for (var i = 0; i < rawParts.length; i++) {
+            var s = rawParts[i].replace(/__DOT__/g, '.').trim();
+            if (s.length === 0) continue;
+            if (mode === 'zh2vi') {
+                if (!/[\u4e00-\u9fa5]/.test(s)) continue; 
+            } else {
+                if (!/[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềếểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸửữựỳỵỷỹ]/.test(s)) continue;
+            }
+            result.push(s);
+        }
+        return result;
+    }
+
+    startBtn.addEventListener('click', async function() {
+        if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
+
+        // ⭐ CHẶN NẾU TÀI KHOẢN HẾT HẠN (Đặt trước bước kiểm tra Token)
+        var isExpired = (currentUser.isExpiredOnly === true || currentUser.tier === 'expired' || currentUser.appTier === 'expired');
+        if (currentUser.expiryDate) {
+            var expTime = new Date(currentUser.expiryDate).getTime();
+            if (!isNaN(expTime) && expTime < Date.now()) isExpired = true;
+        }
+        if (isExpired) {
+            alert('Tài khoản của bạn đã hết hạn. Vui lòng gia hạn để tiếp tục sử dụng tính năng Luyện tập tự do.\n(Số dư Token của bạn vẫn được bảo lưu an toàn).');
+            if (typeof openRenewalModal === 'function') openRenewalModal();
+            return;
+        }
+
+        // Kiểm tra số dư Token (đối với tài khoản còn hạn)
+        if (currentUser.role !== 'admin' && currentUser.role !== 'super_admin' && !currentUser.isPermanent && (myTokenQuota + myBonusTokens - myTokensUsed <= 0)) { 
+            alert('Bạn đã hết token!'); 
+            return; 
+        }
+
+        var rawText = inputArea.value.trim();
+        if (!rawText) { alert('Vui lòng nhập văn bản!'); return; }
+
+        var suspiciousWords = findSuspiciousWords();
+        if (suspiciousWords.length > 0) {
+            var proceed = await showSpellModal(suspiciousWords);
+            if (!proceed) return;
+        }
+
+        startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang dịch...';
+        startBtn.disabled = true;
+        switchBtn.style.pointerEvents = 'none';
+        progressWrap.classList.add('show');
+        progressBar.style.width = '0%';
+
+        var sentences = smartSplit(rawText, currentMode);
+        if (sentences.length === 0) {
+            alert('Không tìm thấy câu hợp lệ!');
+            finishProcess();
+            return;
+        }
+
+        await loadPinyinPro();
+
+        var total = sentences.length;
+        var customData = [];
+        var totalTokensThisSession = 0;
+        var CHUNK_SIZE = 10;
+        var processedCount = 0;
+
+        try {
+            for (var i = 0; i < total; i += CHUNK_SIZE) {
+                var chunk = sentences.slice(i, i + CHUNK_SIZE);
+                var combinedText = chunk.join('\n[---]\n');
+                
+                var data = await fetchTranslate(combinedText, currentMode);
+                if (data.tokensUsed > 0) {
+                    totalTokensThisSession += data.tokensUsed;
+                }
+
+                var translatedChunk = data.translated.split(/\n?\[\s*---\s*\]\n?/);
+
+                for (var j = 0; j < chunk.length; j++) {
+                    var originalSentence = chunk[j];
+                    var transSentence = translatedChunk[j] ? translatedChunk[j].trim() : originalSentence;
+
+                    var zhText = currentMode === 'vi2zh' ? transSentence : originalSentence;
+                    var viText = currentMode === 'vi2zh' ? originalSentence : transSentence;
+                    var pinyinStr = getSmartPinyin(zhText);
+
+                    customData.push({
+                        stt: String(i + j + 1),
+                        zh: zhText,
+                        vi: viText,
+                        pinyin: pinyinStr,
+                        hsk: 'HSK1',
+                        topic: 'Văn bản tự do',
+                        subject: 'Custom'
+                    });
+
+                    processedCount++;
+                    var pct = Math.round((processedCount / total) * 100);
+                    progressBar.style.width = pct + '%';
+                    progressText.textContent = 'Đang xử lý: ' + processedCount + ' / ' + total + ' câu (' + pct + '%)';
+                }
+            }
+
+            customData.sort(function(a, b) { return parseInt(a.stt) - parseInt(b.stt); });
+
+            if (currentUser && currentUser.email && customData.length > 0) {
+                fetch(SERVER_API_URL.replace('/translate', '/history'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        items: customData
+                    })
+                }).catch(function(e) {});
+            }
+
+            if (totalTokensThisSession > 0) {
+                myTokensUsed += totalTokensThisSession;
+                renderTokenUI(isExpired); // ⭐ Truyền isExpired (mặc dù lúc này chắc chắn là false vì đã qua bước chặn ở trên)
+                try {
+                    var cacheKey = 'user_cache_' + currentUser.email;
+                    var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                    if (cached && cached.data) { 
+                        cached.data.tokensUsed = myTokensUsed; 
+                        localStorage.setItem(cacheKey, JSON.stringify(cached)); 
+                    }
+                } catch(e) {}
+            }
+
+            loadDataToPracticeScreen(customData);
+        } catch(e) {
+            console.error('[CP] Batch processing error:', e);
+            alert('Có lỗi xảy ra: ' + e.message);
+        } finally {
+            finishProcess();
+        }
+    });
+    function loadDataToPracticeScreen(customData) {
+        if (typeof window.activateCustomPracticeMode === 'function') {
+            window.activateCustomPracticeMode(customData);
+        } else {
+            if (typeof RAW_DATA !== 'undefined') RAW_DATA = customData;
+            if (typeof filtered !== 'undefined') filtered = customData;
+            if (typeof buildFilters === 'function') buildFilters();
+            if (typeof applyFilter === 'function') applyFilter();
+            if (typeof updateResultCount === 'function') updateResultCount();
+            if (typeof render === 'function') render(true);
+        }
+    }
+
+    function finishProcess() {
+        startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
+        startBtn.disabled = false;
+        switchBtn.style.pointerEvents = 'auto';
+        setTimeout(function() { progressWrap.classList.remove('show'); }, 1200);
+    }
+
+    function loadPinyinPro() {
+        if (window.pinyinPro) return Promise.resolve();
+        return new Promise(function(resolve) {
+            var script = document.createElement('script');
+            script.src = 'https://unpkg.com/pinyin-pro@3.18.2/dist/index.js';
+            script.onload = function() {
+                if (!window.pinyinPro && window.pinyin) window.pinyinPro = window.pinyin;
+                resolve();
+            };
+            script.onerror = function() {
+                var script2 = document.createElement('script');
+                script2.src = 'https://cdn.jsdelivr.net/npm/pinyin-pro@3.18.2/dist/index.min.js';
+                script2.onload = resolve;
+                script2.onerror = resolve;
+                document.head.appendChild(script2);
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // ⭐ HÀM GỢI Ý PINYIN ĐƯỢC TỐI ƯU GỘP CỤM TỪ GHÉP CHUẨN XÁC
+        function getSmartPinyin(text) {
+        if (!text) return '';
+        if (!window.pinyinPro) return text;
+
+        try {
+            // 1. Sử dụng Intl.Segmenter chuẩn hóa tách từ ghép tiếng Trung
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+                var result = [];
+                for (var seg of segmenter.segment(text)) {
+                    var word = seg.segment;
+                    if (/[\u4e00-\u9fa5]/.test(word)) {
+                        // 2. Ép các âm tiết trong cùng một từ ghép viết liền nhau (separator: '')
+                        result.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
+                    } else {
+                        // Giữ nguyên dấu câu, khoảng trắng hoặc ký tự khác
+                        result.push(word);
+                    }
+                }
+                return result.join(' ');
+            }
+            
+            // Fallback an toàn nếu môi trường cũ không hỗ trợ Intl.Segmenter
+            return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+        } catch (e) {
+            return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+        }
+    }
+
+
+    async function fetchTranslate(text, mode) {
+        var translated = '';
+        var tokensUsed = 0;
+
+        try {
+            var source = mode === 'zh2vi' ? 'zh-CN' : 'vi';
+            var target = mode === 'zh2vi' ? 'vi' : 'zh-CN';
+            
+            var res = await fetch(SERVER_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    text: text, 
+                    source: source, 
+                    target: target,
+                    email: currentUser ? currentUser.email : ''
+                })
+            });
+            
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var json = await res.json();
+            if (json.error) throw new Error(json.error);
+            
+            translated = json.translated;
+            tokensUsed = json.tokensUsed || 0;
+        } catch(e) {
+            translated = text; 
+        }
+        
+        return { translated: translated, tokensUsed: tokensUsed };
+    }
+
+    function updateCounterUI() {
+        if (!historyCounter) return;
+        if (isUserAdmin) {
+            historyCounter.innerHTML = '<span style="color:#059669; font-weight:700;"><i class="fas fa-shield-halved"></i> Admin: Không giới hạn Read/Save</span>';
+        } else {
+            var saveRemain = 100 - currentTodayCount;
+            if (saveRemain < 0) saveRemain = 0;
+            var readRemainText = (typeof currentReadRemain !== 'undefined') ? currentReadRemain : 100;
+            historyCounter.innerHTML = '📖 Lượt xem hôm nay: <b style="color:' + (readRemainText > 0 ? '#4f46e5' : '#dc2626') + ';">' + readRemainText + '</b>/100 | ⏳ Đã lưu: <b>' + currentTodayCount + '</b>/100';
+        }
+    }
+
+    function renderHistoryUI() {
+        updateCounterUI();
+        if (cachedHistoryData.length === 0) {
+            historyList.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.9rem;">Chưa có lịch sử dịch nào.</div>';
+            return;
+        }
+        
+        var html = '';
+        cachedHistoryData.forEach(function(item, idx) {
+            html += '<div class="cp-history-item" style="position:relative;" id="cp-hist-' + (item.id || idx) + '">' +
+                '<div class="cp-history-vi">' + (item.text_vi || '') + '</div>' +
+                '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
+                (item.pinyin ? '<div class="cp-history-pinyin">' + item.pinyin + '</div>' : '') +
+                '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
+                    '<div class="cp-history-time">' + (item.createdAt || '') + '</div>' +
+                    '<div style="display:flex; gap:6px;">' +
+                        '<button class="cp-delete-single-history" data-id="' + (item.id || '') + '" data-index="' + idx + '" style="background:#fee2e2; color:#ef4444; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">' +
+                            '<i class="fas fa-trash-alt"></i> Xóa' +
+                        '</button>' +
+                        '<button class="cp-load-single-history" data-index="' + idx + '" style="background:linear-gradient(135deg,#6366f1,#a855f7); color:#fff; border:none; padding:5px 12px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" type="button">' +
+                            '<i class="fas fa-play"></i> Luyện tập' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        historyList.innerHTML = html;
+        
+        var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
+        singleBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(this.getAttribute('data-index'));
+                var targetItem = cachedHistoryData[idx];
+                if (!targetItem) return;
+
+                var singleData = [{
+                    stt: '1',
+                    zh: targetItem.text_zh || '',
+                    vi: targetItem.text_vi || '',
+                    pinyin: targetItem.pinyin || '',
+                    hsk: 'HSK1',
+                    topic: 'Lịch sử dịch',
+                    subject: 'History'
+                }];
+
+                historyOverlay.classList.remove('show');
+                loadDataToPracticeScreen(singleData);
+            });
+        });
+
+        var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
+        deleteBtns.forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+                var docId = this.getAttribute('data-id');
+                var idx = parseInt(this.getAttribute('data-index'));
+                if (!confirm('Bạn có chắc chắn muốn xóa câu này khỏi lịch sử?')) return;
+
+                if (docId) {
+                    try {
+                        var res = await fetch(SERVER_API_URL.replace('/translate', '/history/delete'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: currentUser.email, id: docId })
+                        });
+                        var json = await res.json();
+                        if (json.ok && typeof json.todayCount !== 'undefined') {
+                            currentTodayCount = json.todayCount;
+                        }
+                    } catch(e) {}
+                }
+
+                cachedHistoryData.splice(idx, 1);
+                renderHistoryUI();
+            });
+        });
+    }
+
+    if (historyBtn) {
+        historyBtn.addEventListener('click', async function() {
+            if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập để xem lịch sử!'); return; }
+            
+            historyOverlay.classList.add('show');
+            historyList.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.9rem;"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+            historyCounter.textContent = 'Đang tải bộ đếm...';
+            
+            try {
+                var res = await fetch(SERVER_API_URL.replace('/translate', '/history'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: currentUser.email,
+                        _method: 'GET'
+                    })
+                });
+                
+                var json = await res.json();
+                if (!json.ok || !json.history) throw new Error(json.error || 'Không thể tải lịch sử');
+                
+                cachedHistoryData = json.history;
+                currentTodayCount = json.todayCount || 0;
+                currentReadRemain = (typeof json.readRemain !== 'undefined') ? json.readRemain : 100;
+                isUserAdmin = json.isAdmin || false;
+
+                renderHistoryUI();
+                
+            } catch (e) {
+                historyList.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:0.9rem;">Lỗi tải lịch sử: ' + e.message + '</div>';
+                historyCounter.textContent = 'Không tải được bộ đếm';
+            }
+        });
+    }
+
+    if (selectAllHistoryBtn) {
+        selectAllHistoryBtn.addEventListener('click', function() {
+            if (!cachedHistoryData || cachedHistoryData.length === 0) {
+                alert('Không có lịch sử nào để chọn!');
+                return;
+            }
+
+            var allPracticeData = [];
+            cachedHistoryData.forEach(function(item, idx) {
+                allPracticeData.push({
+                    stt: String(idx + 1),
+                    zh: item.text_zh || '',
+                    vi: item.text_vi || '',
+                    pinyin: item.pinyin || '',
+                    hsk: 'HSK1',
+                    topic: 'Lịch sử dịch',
+                    subject: 'History'
+                });
+            });
+
+            historyOverlay.classList.remove('show');
+            loadDataToPracticeScreen(allPracticeData);
+        });
+    }
+
+    if (historyCloseBtn) {
+        historyCloseBtn.addEventListener('click', function() {
+            historyOverlay.classList.remove('show');
+        });
+    }
+    if (historyOverlay) {
+        historyOverlay.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('show');
+        });
+    }
+
+    // ⭐ SỰ KIỆN CLICK VÀO Ô TOKEN (BỔ SUNG) — COOLDOWN 60 GIÂY
+    if (tokenBadge) {
+        tokenBadge.addEventListener('click', async function() {
+            var now = Date.now();
+            var timeSinceLastRefresh = now - lastTokenRefreshTime;
+            
+            // 🛑 Chặn nếu đang refresh
+            if (isTokenRefreshing || this.classList.contains('refreshing')) return;
+            
+            // 🛑 Chặn nếu chưa hết cooldown
+            if (timeSinceLastRefresh < TOKEN_REFRESH_COOLDOWN) {
+                var waitSec = Math.ceil((TOKEN_REFRESH_COOLDOWN - timeSinceLastRefresh) / 1000);
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('⏳ Vui lòng đợi ' + waitSec + ' giây nữa', 'warn');
+                }
+                return;
+            }
+            
+            // ✅ Cho phép refresh
+            isTokenRefreshing = true;
+            lastTokenRefreshTime = now;
+            try { localStorage.setItem('cp_last_token_refresh', String(now)); } catch(e) {}
+            
+            this.classList.add('refreshing');
+            this.classList.remove('cooldown');
+            var originalText = tokenText.textContent;
+            tokenText.textContent = 'Đang cập nhật...';
+            
+            var ok = await refreshTokenFromFirestore();
+            
+            this.classList.remove('refreshing');
+            isTokenRefreshing = false;
+            
+            if (!ok) {
+                // Nếu lỗi → cho phép bấm lại ngay
+                lastTokenRefreshTime = 0;
+                try { localStorage.removeItem('cp_last_token_refresh'); } catch(e) {}
+                tokenText.textContent = originalText;
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('⚠️ Không thể cập nhật, vui lòng thử lại', 'warn');
+                }
+            } else {
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('✅ Đã cập nhật số dư Token. Đợi 60s để bấm tiếp.', 'success');
+                }
+                startCooldownTimer();
+            }
+        });
+    }
+
+    setTimeout(initTokenState, 100);
+    setTimeout(initTokenState, 1500);
+
 })();
 
 
