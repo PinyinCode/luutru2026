@@ -1200,7 +1200,28 @@ def build_custom_practice_js():
                 '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
                 (item.pinyin ? '<div class="cp-history-pinyin">' + item.pinyin + '</div>' : '') +
                 '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
-                    '<div class="cp-history-time">' + (item.createdAt || '') + '</div>' +
+                    '<div class="cp-history-time">' + (function(timeStr) {
+    if (!timeStr) return '';
+    try {
+        // Chuyển đổi chuỗi thời gian từ Server sang đối tượng Date (Server đang trả về giờ UTC)
+        var d = new Date(timeStr.replace(' ', 'T') + 'Z'); 
+        if (isNaN(d.getTime())) return timeStr;
+        
+        // Cộng thêm 7 tiếng để ra giờ Việt Nam
+        d.setHours(d.getHours() + 7);
+        
+        // Format lại thành chuỗi YYYY-MM-DD HH:mm:ss
+        var yyyy = d.getFullYear();
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var dd = String(d.getDate()).padStart(2, '0');
+        var hh = String(d.getHours()).padStart(2, '0');
+        var min = String(d.getMinutes()).padStart(2, '0');
+        var ss = String(d.getSeconds()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
+    } catch(e) {
+        return timeStr;
+    }
+})(item.createdAt || '') + '</div>' +
                     '<div style="display:flex; gap:6px;">' +
                         '<button class="cp-delete-single-history" data-id="' + (item.id || '') + '" data-index="' + idx + '" style="background:#fee2e2; color:#ef4444; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">' +
                             '<i class="fas fa-trash-alt"></i> Xóa' +
