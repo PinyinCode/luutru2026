@@ -509,6 +509,7 @@ def build_custom_practice_js():
     var myTokenQuota = 0;
     var myBonusTokens = 0;
     var currentUser = null;
+    var lastDeletedText = ''; // ⭐ Biến lưu văn bản vừa xoá
     var resolveModalAction = null;
     var cachedHistoryData = [];
     var currentTodayCount = 0;
@@ -954,7 +955,18 @@ def build_custom_practice_js():
         checkSpellingSuggestions();
     }
 
-    inputArea.addEventListener('input', updateCharCount);
+    inputArea.addEventListener('input', function() {
+        updateCharCount();
+        
+        // ⭐ Nếu người dùng tự gõ nội dung mới, huỷ bộ nhớ tạm
+        if (lastDeletedText !== '') {
+            lastDeletedText = '';
+            resetBtn.innerHTML = '<i class="fas fa-rotate-right"></i>';
+            resetBtn.title = 'Làm mới';
+            resetBtn.style.color = '';
+            resetBtn.style.borderColor = '';
+        }
+    });
     setTimeout(updateCharCount, 200);
 
     switchBtn.addEventListener('click', function() {
@@ -975,13 +987,40 @@ def build_custom_practice_js():
     });
 
     resetBtn.addEventListener('click', function() {
-        inputArea.value = '';
-        spellContainer.classList.remove('show');
-        updateCharCount();
-        progressWrap.classList.remove('show');
-        startBtn.disabled = false;
-        startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
-        setTimeout(autoResizeTextarea, 50);
+        var currentText = inputArea.value;
+
+        // ⭐ TRƯỜNG HỢP 1: Nếu hiện tại đang có chữ -> Tiến hành xoá (lưu tạm)
+        if (currentText.trim() !== '') {
+            lastDeletedText = currentText; // Lưu lại để phòng bấm nhầm
+            inputArea.value = ''; // Xoá trắng
+            
+            // Đổi icon nút thành "Khôi phục"
+            resetBtn.innerHTML = '<i class="fas fa-undo"></i>';
+            resetBtn.title = 'Bấm lần nữa để khôi phục văn bản';
+            resetBtn.style.color = '#16a34a'; // Màu xanh lá để báo hiệu
+            resetBtn.style.borderColor = '#16a34a';
+            
+            spellContainer.classList.remove('show');
+            updateCharCount();
+            progressWrap.classList.remove('show');
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
+            setTimeout(autoResizeTextarea, 50);
+        } 
+        // ⭐ TRƯỜNG HỢP 2: Ô nhập đang trống & có chữ đã xoá -> Khôi phục lại
+        else if (lastDeletedText !== '') {
+            inputArea.value = lastDeletedText; // Trả lại văn bản
+            lastDeletedText = ''; // Xoá bộ nhớ tạm
+            
+            // Trả nút về trạng thái bình thường
+            resetBtn.innerHTML = '<i class="fas fa-rotate-right"></i>';
+            resetBtn.title = 'Làm mới';
+            resetBtn.style.color = '';
+            resetBtn.style.borderColor = '';
+            
+            updateCharCount();
+            setTimeout(autoResizeTextarea, 50);
+        }
     });
 
     function showSpellModal(words) {
