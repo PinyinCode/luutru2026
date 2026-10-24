@@ -845,10 +845,12 @@ def build_custom_practice_js():
             buyTokenBtn.disabled = true;
 
             try {
-                var apiUrl = SERVER_API_URL.replace('/translate', '/admin/appro':ve-t 'oken');
+                // Sửa lại đường dẫn API cho chuẩn
+                var apiUrl = SERVER_API_URL.replace('/translate', '/admin/approve-token');
                 var res = await fetch(apiUrl, {
                     method: 'POST',
-                   application headers: { 'Content-Type/json' },
+                    // Sửa lại headers cho chuẩn
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         admin_email: currentUser.email,
                         target_email: currentUser.email, // Tự nạp cho chính mình
