@@ -620,8 +620,9 @@ def build_custom_practice_js():
             tokenBadge.className = 'cp-token-badge';
             return;
         } else {
-            // Admin và User thường đều dùng chung hạn mức (mặc định 20.000)
-            myTokenQuota = user.tokenQuota || 20000;
+            // Nếu user là admin thì hiển thị 20.000, user thường 10.000
+            var defaultQuota = (user.role === 'admin') ? 20000 : 10000;
+            myTokenQuota = user.tokenQuota || defaultQuota;
         }
 
         myBonusTokens = user.bonusTokens || 0;
@@ -660,7 +661,12 @@ def build_custom_practice_js():
             var freshData = doc.data();
             currentUser.bonusTokens = freshData.bonusTokens || 0;
             currentUser.tokensUsed = freshData.tokensUsed || 0;
-            currentUser.tokenQuota = freshData.tokenQuota || 10000;
+            // Nếu server trả về tokenQuota thì lấy, nếu không thì tự động gán theo role
+            if (freshData.tokenQuota) {
+                currentUser.tokenQuota = freshData.tokenQuota;
+            } else {
+                currentUser.tokenQuota = (currentUser.role === 'admin') ? 20000 : 10000;
+            }
             currentUser.isPermanent = freshData.isPermanent || false;
             currentUser.role = freshData.role || currentUser.role;
             
