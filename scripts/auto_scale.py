@@ -296,11 +296,10 @@ html body .card-zh{
 html body .card.focused .card-zh{
     font-size:calc(clamp(1.7rem,3.4vmin,2.6rem) * var(--ui-scale,1))!important
 }
-html body .card-pinyin{
-    padding:calc(clamp(.28rem,.55vmin,.45rem) * var(--ui-scale,1))
-             calc(clamp(.6rem,1.2vmin,.95rem) * var(--ui-scale,1))!important;
-    font-size:calc(clamp(.8rem,1.5vmin,1.1rem) * var(--ui-scale,1))!important;
-    border-radius:calc(clamp(50px,7vmin,100px) * var(--ui-scale,1))!important
+html body .card-pinyin {
+    padding: calc(clamp(.28rem,.55vmin,.45rem) * var(--ui-scale,1)) calc(clamp(.6rem,1.2vmin,.95rem) * var(--ui-scale,1)) !important;
+    font-size: calc(clamp(.8rem,1.5vmin,1.1rem) * var(--ui-scale,1)) !important;
+    border-radius: 8px !important; /* ⭐ Sửa dòng này */
 }
 html body .card-body{
     margin-bottom:calc(clamp(.6rem,1.2vmin,1rem) * var(--ui-scale,1))!important
