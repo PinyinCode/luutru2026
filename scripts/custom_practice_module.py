@@ -1064,6 +1064,7 @@ def build_custom_practice_js():
         var totalTokensThisSession = 0;
         var CHUNK_SIZE = 10;
         var processedCount = 0;
+        var groupId = Date.now(); // ⭐ THÊM DÒNG NÀY: Tạo mã nhóm
 
         try {
             for (var i = 0; i < total; i += CHUNK_SIZE) {
@@ -1087,6 +1088,7 @@ def build_custom_practice_js():
 
                     customData.push({
                         stt: String(i + j + 1),
+                        groupId: groupId, // ⭐ THÊM DÒNG NÀY
                         zh: zhText,
                         vi: viText,
                         pinyin: pinyinStr,
@@ -1262,7 +1264,7 @@ def build_custom_practice_js():
         
         var html = '';
         cachedHistoryData.forEach(function(item, idx) {
-            // Xử lý thời gian: Ép kiểu về Date (UTC) và để trình duyệt tự đổi sang giờ máy
+            // Xử lý thời gian
             var timeDisplay = item.createdAt || '';
             if (timeDisplay) {
                 try {
@@ -1276,31 +1278,39 @@ def build_custom_practice_js():
                         var ss = String(d.getSeconds()).padStart(2, '0');
                         timeDisplay = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
                     }
-                } catch(e) {
-                    // Nếu lỗi thì giữ nguyên chuỗi gốc
-                }
+                } catch(e) {}
             }
 
-            html += '<div class="cp-history-item" style="position:relative;" id="cp-hist-' + (item.id || idx) + '">' +
-                '<div class="cp-history-vi">' + (item.text_vi || '') + '</div>' +
-                '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
-                (item.pinyin ? '<div class="cp-history-pinyin">' + item.pinyin + '</div>' : '') +
-                '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
-                    '<div class="cp-history-time">' + timeDisplay + '</div>' +
-                    '<div style="display:flex; gap:6px;">' +
-                        '<button class="cp-delete-single-history" data-id="' + (item.id || '') + '" data-index="' + idx + '" style="background:#fee2e2; color:#ef4444; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">' +
-                            '<i class="fas fa-trash-alt"></i> Xóa' +
-                        '</button>' +
-                        '<button class="cp-load-single-history" data-index="' + idx + '" style="background:linear-gradient(135deg,#6366f1,#a855f7); color:#fff; border:none; padding:5px 12px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" type="button">' +
-                            '<i class="fas fa-play"></i> Luyện tập' +
-                        '</button>' +
+            // ⭐ Lấy STT gốc (nếu DB cũ không có thì dùng idx + 1)
+            var sttNumber = item.stt || (idx + 1);
+
+            // ⭐ Bố cục mới: Vòng tròn STT bên trái, nội dung bên phải
+            html += '<div class="cp-history-item" style="position:relative; display:flex; align-items:flex-start; gap:8px;" id="cp-hist-' + (item.id || idx) + '">' +
+                
+                // Vòng tròn đánh số
+                '<div style="display:flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px; box-shadow:0 2px 6px rgba(79,70,229,.3);">' + sttNumber + '</div>' +
+                
+                '<div style="flex:1; min-width:0;">' +
+                    '<div class="cp-history-vi">' + (item.text_vi || '') + '</div>' +
+                    '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
+                    (item.pinyin ? '<div class="cp-history-pinyin">' + item.pinyin + '</div>' : '') +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
+                        '<div class="cp-history-time">' + timeDisplay + '</div>' +
+                        '<div style="display:flex; gap:6px;">' +
+                            '<button class="cp-delete-single-history" data-id="' + (item.id || '') + '" data-index="' + idx + '" style="background:#fee2e2; color:#ef4444; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">' +
+                                '<i class="fas fa-trash-alt"></i> Xóa' +
+                            '</button>' +
+                            '<button class="cp-load-single-history" data-index="' + idx + '" style="background:linear-gradient(135deg,#6366f1,#a855f7); color:#fff; border:none; padding:5px 12px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" type="button">' +
+                                '<i class="fas fa-play"></i> Luyện tập' +
+                            '</button>' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
         });
         historyList.innerHTML = html;
         
-        // ⭐ GẮN SỰ KIỆN CHO NÚT "LUYỆN TẬP"
+        // GẮN SỰ KIỆN CHO NÚT "LUYỆN TẬP"
         var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -1309,7 +1319,7 @@ def build_custom_practice_js():
                 if (!targetItem) return;
 
                 var singleData = [{
-                    stt: '1',
+                    stt: targetItem.stt || String(idx + 1), // ⭐ Lấy STT gốc
                     zh: targetItem.text_zh || '',
                     vi: targetItem.text_vi || '',
                     pinyin: targetItem.pinyin || '',
@@ -1323,7 +1333,7 @@ def build_custom_practice_js():
             });
         });
 
-        // ⭐ GẮN SỰ KIỆN CHO NÚT "XÓA"
+        // GẮN SỰ KIỆN CHO NÚT "XÓA"
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
             btn.addEventListener('click', async function() {
@@ -1350,6 +1360,7 @@ def build_custom_practice_js():
             });
         });
     }
+
     if (historyBtn) {
         historyBtn.addEventListener('click', async function() {
             if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập để xem lịch sử!'); return; }
@@ -1402,7 +1413,7 @@ def build_custom_practice_js():
             var allPracticeData = [];
             cachedHistoryData.forEach(function(item, idx) {
                 allPracticeData.push({
-                    stt: String(idx + 1),
+                    stt: item.stt || String(idx + 1), // ⭐ Lấy STT gốc
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
@@ -1472,7 +1483,6 @@ def build_custom_practice_js():
             }
         });
     }
-
     setTimeout(initTokenState, 100);
     setTimeout(initTokenState, 1500);
 
