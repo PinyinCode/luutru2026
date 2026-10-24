@@ -967,8 +967,9 @@ def build_custom_practice_js():
             return;
         }
 
-        if (currentUser.role !== 'admin' && currentUser.role !== 'super_admin' && !currentUser.isPermanent && (myTokenQuota + myBonusTokens - myTokensUsed <= 0)) { 
-            alert('Bạn đã hết token!'); 
+        // ⭐ KIỂM TRA SỐ DƯ TOKEN (Áp dụng cho cả Admin)
+        if (!currentUser.isPermanent && currentUser.role !== 'super_admin' && (myTokenQuota + myBonusTokens - myTokensUsed <= 0)) { 
+            alert('Bạn đã hết token! Vui lòng mua thêm hoặc quay lại vào ngày mai (đối với Admin).'); 
             return; 
         }
 
