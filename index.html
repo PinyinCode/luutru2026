@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -6280,24 +6283,23 @@ body.hide-floating .tiktok-bar { display: none !important; }
 
 /* INTRO */
 
-/* ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════ */
 /* QUICK INTRO BANNER — Marquee nổi bật, dễ nhận diện            */
-/* ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════ */
 .quick-intro-banner {
     display: flex;
     align-items: center;
     gap: .65rem;
     padding: .65rem .9rem;
     margin-bottom: 1rem;
-    /* Nền Gradient rực rỡ: Xanh lá -> Xanh dương */
-    background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #6366f1 100%);
+    /* ⭐ Gradient: Xanh dương -> Tím (Đồng bộ với Trợ Lý Dịch) */
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 14px;
     overflow: hidden;
     position: relative;
     animation: qibSlideDown .5s cubic-bezier(.34, 1.56, .64, 1);
-    /* Hiệu ứng phát sáng (Glow) xung quanh banner */
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transition: box-shadow .3s ease, transform .3s ease;
 }
 @keyframes qibSlideDown {
@@ -6311,19 +6313,19 @@ body[data-vocab-mode="1"] .quick-intro-banner {
     display: none !important;
 }
 
-/* Icon loa: Nền đỏ/hồng rực, phát sáng */
+/* Icon loa: Màu Vàng kim nổi bật */
 .qib-icon {
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #ef4444, #ec4899);
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
     flex-shrink: 0;
-    box-shadow: 0 3px 12px rgba(236, 72, 153, 0.5);
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.5);
     position: relative;
     z-index: 2;
 }
@@ -6334,16 +6336,8 @@ body[data-vocab-mode="1"] .quick-intro-banner {
     height: 32px;
     overflow: hidden;
     position: relative;
-    mask-image: linear-gradient(90deg,
-        transparent 0%,
-        #000 5%,
-        #000 95%,
-        transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg,
-        transparent 0%,
-        #000 5%,
-        #000 95%,
-        transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
 }
 
 .qib-track {
@@ -6410,8 +6404,7 @@ body[data-vocab-mode="1"] .quick-intro-banner {
     font-size: .95rem;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform .2s cubic-bezier(.34,1.56,.64,1),
-                box-shadow .2s, background .2s, border-color .2s;
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s, background .2s, border-color .2s;
     position: relative;
     font-family: inherit;
     padding: 0;
@@ -6422,7 +6415,7 @@ body[data-vocab-mode="1"] .quick-intro-banner {
 .qib-mock-btn:hover {
     transform: scale(1.15) translateY(-2px);
     background: #fff;
-    color: #1e40af;
+    color: #3b82f6;
     border-color: #fff;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
@@ -13576,19 +13569,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13746,19 +13727,19 @@ body.has-floating-group #quickSearchRoot{
 <div class="container">
 
 
-<!-- QUICK INTRO BANNER — Marquee thông báo tính năng luyện tập + 2 nút mock -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
-        <i class="fas fa-bullhorn"></i>
+        <i class="fas fa-robot"></i>
     </div>
 
     <div class="qib-marquee">
         <div class="qib-track">
             <span class="qib-item sep">
-                Luyện đánh máy, ghép câu, viết HSK 1-9
+                🤖 TÍNH NĂNG MỚI: TRỢ LÝ AI DỊCH THUẬT - Dịch văn bản siêu tốc, tạo bài tập cá nhân hóa chỉ trong 1 click!
             </span>
             <span class="qib-item sep">
-                Luyện đánh máy, ghép câu, viết HSK 1-9
+                🤖 TÍNH NĂNG MỚI: TRỢ LÝ AI DỊCH THUẬT - Dịch văn bản siêu tốc, tạo bài tập cá nhân hóa chỉ trong 1 click!
             </span>
         </div>
     </div>
@@ -13766,13 +13747,13 @@ body.has-floating-group #quickSearchRoot{
     <div class="qib-mock-actions">
         <button type="button" class="qib-mock-btn write"
                 id="qibMockWriteBtn"
-                title="Bấm nút này trên mỗi câu để luyện viết chữ Hán">
-            <i class="fas fa-pen-fancy"></i>
+                title="Đổi chiều dịch Việt - Trung">
+            <i class="fas fa-exchange-alt"></i>
         </button>
         <button type="button" class="qib-mock-btn full"
                 id="qibMockFullBtn"
-                title="Bấm nút này trên mỗi câu để mở chế độ luyện tập toàn màn hình">
-            <i class="fas fa-expand"></i>
+                title="Bấm để bắt đầu dịch văn bản tự do">
+            <i class="fas fa-rocket"></i>
         </button>
     </div>
 
@@ -26366,9 +26347,9 @@ window.toggleAddUserFormAdmin = function() {
 
 /* INTRO */
 
-/* ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════ */
 /* QUICK INTRO BANNER — Marquee + 2 nút mock + auto-hide theo tab */
-/* ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════ */
 function initQuickIntroBanner() {
     var banner = $('quickIntroBanner');
     var dismiss = $('quickIntroDismiss');
@@ -26401,31 +26382,21 @@ function initQuickIntroBanner() {
         window.addEventListener('resize', updateSpeed);
     }
 
-    /* ─── 2 nút mock — click để làm nổi bật nút thật trên card đầu tiên ─── */
+    /* ─── 2 nút mock — click để làm nổi bật nút thật trên khung Trợ lý dịch ─── */
     var mockWriteBtn = $('qibMockWriteBtn');
     var mockFullBtn  = $('qibMockFullBtn');
 
     function highlightRealButton(selector) {
-        var firstCard = document.querySelector('.card');
-        if (!firstCard) {
-            var main = document.getElementById('mainContent');
-            if (main) {
-                window.scrollTo({
-                    top: main.getBoundingClientRect().top + window.scrollY - 100,
-                    behavior: 'smooth'
-                });
-            }
-            return;
-        }
-
-        var targetBtn = firstCard.querySelector(selector);
+        var targetBtn = document.querySelector(selector);
         if (!targetBtn) return;
 
+        // Cuộn đến phần tử (Trợ lý dịch thuật)
         window.scrollTo({
-            top: firstCard.getBoundingClientRect().top + window.scrollY - 100,
+            top: targetBtn.getBoundingClientRect().top + window.scrollY - 150,
             behavior: 'smooth'
         });
 
+        // Hiệu ứng nhấp nháy
         var origBoxShadow = targetBtn.style.boxShadow;
         var origTransform = targetBtn.style.transform;
         var origZIndex = targetBtn.style.zIndex;
@@ -26434,7 +26405,7 @@ function initQuickIntroBanner() {
             count++;
             if (count % 2 === 1) {
                 targetBtn.style.boxShadow = '0 0 0 6px rgba(37,99,235,.4), 0 4px 14px rgba(37,99,235,.4)';
-                targetBtn.style.transform = 'scale(1.25)';
+                targetBtn.style.transform = 'scale(1.1)';
                 targetBtn.style.zIndex = '100';
             } else {
                 targetBtn.style.boxShadow = origBoxShadow || '';
@@ -26455,7 +26426,8 @@ function initQuickIntroBanner() {
         mockWriteBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            highlightRealButton('.write-btn');
+            // Trỏ đến nút chuyển đổi ngôn ngữ (cpSwitchBtn)
+            highlightRealButton('#cpSwitchBtn');
         });
     }
 
@@ -26464,7 +26436,8 @@ function initQuickIntroBanner() {
         mockFullBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            highlightRealButton('.practice-full-btn');
+            // Trỏ đến nút bắt đầu dịch (cpStartBtn)
+            highlightRealButton('#cpStartBtn');
         });
     }
 
