@@ -3950,6 +3950,7 @@ def build_ui_html():
 <div class="container">
 
 <!-- __QUICK_INTRO_BANNER__ -->
+<!-- __CUSTOM_PRACTICE_SECTION__ -->
 
 
 <div class="expiry-banner" id="expiryBanner" style="display:none">
@@ -7134,57 +7135,79 @@ function countSyllables(pinyinWord) {
 
 function splitByPinyin(zh, pinyin) {
     if (!zh) return [];
-    var hanziChars = [];
+    
+    var chars = [];
     for (var i = 0; i < zh.length; i++) {
-        var c = zh[i];
-        if (/[\u4e00-\u9fa5]/.test(c)) hanziChars.push(c);
+        if (!/\s/.test(zh[i])) chars.push(zh[i]);
     }
-    if (hanziChars.length === 0) return [];
+    if (chars.length === 0) return [];
 
     if (!pinyin || !pinyin.trim()) {
-        return hanziChars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
+        return chars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
     }
 
-    var normalizedPinyin = pinyin
-        .replace(/[.,!?;:'"()\[\]{}\-~`@#$%^&*+=|\\/<>。，！？、；：""'']/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+    // Tách các từ pinyin theo khoảng trắng ban đầu
+    var rawPinyinWords = pinyin.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+    
+    // --- THUẬT TOÁN TỰ ĐỘNG GỘP TỪ GHÉP THÔNG MINH ---
+    // Tự động gom các từ 1 âm tiết đứng cạnh nhau thành từ ghép 2 âm tiết (trừ các trợ từ đơn độc lập)
+    var pinyinWords = [];
+    var skipParticles = ['de', 'le', 'ne', 'ma', 'ba', 'a', 'shì', 'yǒu']; // Các trợ từ/đại từ có thể đứng riêng
+    
+    for (var i = 0; i < rawPinyinWords.length; i++) {
+        var curr = rawPinyinWords[i];
+        var cleanCurr = curr.replace(/[^a-zA-Züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, '').toLowerCase();
+        var currSyllables = countSyllables(cleanCurr);
+        
+        // Nếu từ hiện tại là 1 âm tiết và từ kế tiếp cũng là 1 âm tiết -> Gộp lại thành 1 từ ghép
+        if (currSyllables === 1 && i + 1 < rawPinyinWords.length) {
+            var next = rawPinyinWords[i + 1];
+            var cleanNext = next.replace(/[^a-zA-Züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, '').toLowerCase();
+            var nextSyllables = countSyllables(cleanNext);
+            
+            if (nextSyllables === 1 && skipParticles.indexOf(cleanCurr) === -1 && skipParticles.indexOf(cleanNext) === -1) {
+                // Gộp thành một cặp từ Pinyin liền mạch
+                pinyinWords.push(curr + ' ' + next);
+                i++; // Bỏ qua từ tiếp theo vì đã được gộp vào cặp
+                continue;
+            }
+        }
+        pinyinWords.push(curr);
+    }
 
-    var pinyinWords = normalizedPinyin.split(/\s+/).filter(function(w) { return w.length > 0; });
     var syllableCounts = pinyinWords.map(function(w) { return countSyllables(w); });
-    var totalSyllables = syllableCounts.reduce(function(a, b) { return a + b; }, 0);
+    var result = [];
+    var charIdx = 0;
 
-    if (totalSyllables === hanziChars.length) {
-        var result = [];
-        var charIdx = 0;
-        for (var j = 0; j < syllableCounts.length; j++) {
-            var cnt = syllableCounts[j];
-            if (cnt <= 0) continue;
-            var phrase = hanziChars.slice(charIdx, charIdx + cnt).join('');
-            if (phrase) {
-                result.push({
-                    text: phrase,
-                    type: 'phrase',
-                    pinyin: pinyinWords[j] || ''
-                });
-            }
-            charIdx += cnt;
+    for (var j = 0; j < pinyinWords.length; j++) {
+        var py = pinyinWords[j];
+        var cnt = syllableCounts[j];
+        if (cnt <= 0) cnt = 1;
+
+        if (charIdx >= chars.length) break;
+
+        var phrase = chars.slice(charIdx, charIdx + cnt).join('');
+        if (phrase) {
+            result.push({
+                text: phrase,
+                type: 'phrase',
+                pinyin: py
+            });
         }
-        if (charIdx < hanziChars.length) {
-            var remaining = hanziChars.slice(charIdx).join('');
-            if (result.length > 0) {
-                result[result.length - 1].text += remaining;
-                if (charIdx < pinyinWords.length) {
-                    result[result.length - 1].pinyin += ' ' + pinyinWords.slice(charIdx).join(' ');
-                }
-            } else {
-                result.push({ text: remaining, type: 'single', pinyin: '' });
-            }
-        }
-        return result;
+        charIdx += cnt;
     }
 
-    return hanziChars.map(function(c) { return { text: c, type: 'single', pinyin: '' }; });
+    // Xử lý phần ký tự thừa nếu có ở cuối câu
+    if (charIdx < chars.length) {
+        var remaining = chars.slice(charIdx).join('');
+        if (result.length > 0) {
+            result[result.length - 1].text += remaining;
+        } else {
+            result.push({ text: remaining, type: 'single', pinyin: '' });
+        }
+    }
+
+    return result;
 }
 
 function updateInlinePreview(input, answer) {
