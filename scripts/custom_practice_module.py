@@ -614,15 +614,13 @@ def build_custom_practice_js():
             return;
         }
 
-        if (user.role === 'super_admin' || user.role === 'admin' || user.isPermanent) {
-            if (user.role === 'admin' || user.role === 'super_admin') {
-                myTokenQuota = 100000;
-            } else {
-                tokenText.textContent = 'Không giới hạn';
-                tokenBadge.className = 'cp-token-badge';
-                return;
-            }
+        // Nếu là isPermanent thì không giới hạn
+        if (user.role === 'super_admin' || user.isPermanent) {
+            tokenText.textContent = 'Không giới hạn';
+            tokenBadge.className = 'cp-token-badge';
+            return;
         } else {
+            // Admin và User thường đều dùng chung hạn mức (mặc định 20.000)
             myTokenQuota = user.tokenQuota || 20000;
         }
 
