@@ -357,18 +357,12 @@ def build_custom_practice_css():
     .cp-btn-start, .cp-btn-buy-token { width: auto; min-width: 280px; align-self: flex-end; }
 }
 
-.cp-token-badge.cooldown {
-    background: rgba(100, 116, 139, 0.15) !important;
-    color: #64748b !important;
-    border-color: rgba(100, 116, 139, 0.3) !important;
-    cursor: not-allowed !important;
-}
-.cp-token-badge.cooldown:hover {
-    transform: none;
-    box-shadow: none;
-}
-.cp-token-badge.cooldown .refresh-hint {
-    display: none;
+.cp-btn-reset:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--surface-2, #f1f5f9);
+    color: #94a3b8;
+    border-color: #e2e8f0;
 }
 .cp-hidden {
     display: none !important;
@@ -986,7 +980,7 @@ def build_custom_practice_js():
         updateCharCount();
     });
 
-    resetBtn.addEventListener('click', function() {
+    resetBtn.addEventListener('click', async function() {
         var currentText = inputArea.value;
 
         // ⭐ TRƯỜNG HỢP 1: Nếu hiện tại đang có chữ -> Tiến hành xoá (lưu tạm)
@@ -997,7 +991,7 @@ def build_custom_practice_js():
             // Đổi icon nút thành "Khôi phục"
             resetBtn.innerHTML = '<i class="fas fa-undo"></i>';
             resetBtn.title = 'Bấm lần nữa để khôi phục văn bản';
-            resetBtn.style.color = '#16a34a'; // Màu xanh lá để báo hiệu
+            resetBtn.style.color = '#16a34a'; 
             resetBtn.style.borderColor = '#16a34a';
             
             spellContainer.classList.remove('show');
@@ -1020,6 +1014,80 @@ def build_custom_practice_js():
             
             updateCharCount();
             setTimeout(autoResizeTextarea, 50);
+        } 
+        // ⭐ TRƯỜNG HỢP 3: Ô trống, không có chữ lưu tạm -> Bấm để Cập nhật Token
+        else {
+            if (!currentUser || !currentUser.email) {
+                alert('Vui lòng đăng nhập để kiểm tra Token!');
+                return;
+            }
+            if (currentUser.role === 'super_admin' || currentUser.isPermanent) {
+                alert('Tài khoản của bạn không giới hạn Token!');
+                return;
+            }
+
+            // Đổi nút thành đang tải và KHÓA lại
+            var originalHTML = resetBtn.innerHTML;
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            tokenText.textContent = 'Đang kiểm tra...';
+
+            try {
+                // ⭐ Gọi API mới lên Server
+                var res = await fetch(SERVER_API_URL.replace('/translate', '/user/check-token'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentUser.email })
+                });
+                var json = await res.json();
+                
+                if (json.ok) {
+                    // Cập nhật lại biến & localStorage
+                    myTokenQuota = json.quota;
+                    myBonusTokens = json.bonus;
+                    myTokensUsed = json.used;
+                    
+                    var cacheKey = 'user_cache_' + currentUser.email;
+                    var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                    if (cached && cached.data) {
+                        cached.data.tokenQuota = json.quota;
+                        cached.data.bonusTokens = json.bonus;
+                        cached.data.tokensUsed = json.used;
+                        cached.data.role = json.role;
+                        if (json.lastTokenResetDate) cached.data.lastTokenResetDate = json.lastTokenResetDate;
+                        if (json.lastTokenResetMonth) cached.data.lastTokenResetMonth = json.lastTokenResetMonth;
+                        localStorage.setItem(cacheKey, JSON.stringify(cached));
+                        currentUser = cached.data;
+                    }
+                    renderTokenUI(checkIsExpired()); // Cập nhật UI
+                    
+                    if (typeof showUserChangedToast === 'function') {
+                        showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
+                    }
+                } else {
+                    tokenText.textContent = 'Lỗi dữ liệu';
+                    if (typeof showUserChangedToast === 'function') showUserChangedToast('⚠️ Lỗi: ' + json.error, 'warn');
+                }
+            } catch (e) {
+                tokenText.textContent = 'Lỗi mạng';
+                if (typeof showUserChangedToast === 'function') showUserChangedToast('⚠️ Lỗi kết nối Server', 'warn');
+            }
+
+            // ⭐ Bắt đầu đếm ngược 60s
+            var timeLeft = 60;
+            resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
+            
+            var cooldownTimer = setInterval(function() {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(cooldownTimer);
+                    resetBtn.disabled = false;
+                    resetBtn.innerHTML = originalHTML; // Trả lại icon xoay vòng
+                    resetBtn.title = 'Làm mới / Kiểm tra Token';
+                } else {
+                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
+                }
+            }, 1000);
         }
     });
 
