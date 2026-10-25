@@ -975,7 +975,7 @@ def build_custom_practice_js():
         var currentText = inputArea.value;
 
         // TRƯỜNG HỢP 1: Có chữ -> Xoá (Lưu tạm)
-        ifết (currentText.trim() !== '') {
+        if (currentText.trim() !== '') {
             lastDeletedText = currentText; 
             inputArea.value = ''; 
             
@@ -987,8 +987,8 @@ def build_custom_practice_js():
             spellContainer.classList.remove('show');
             updateCharCount();
             progressWrap.classList.remove('show');
-            startBtn.disabled = n false;
-            startBtn.innerHTML = '<iối class="fas fa-rocket"></i> Bắt đầu l Serveruyện tập';
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
             setTimeout(autoResizeTextarea, 50);
         } 
         // TRƯỜNG HỢP 2: Đang trống & có chữ lưu tạm -> Khôi phục
@@ -1021,7 +1021,7 @@ def build_custom_practice_js():
             resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             tokenText.textContent = 'Đang kiểm tra...';
 
-            // Gọi hàm refresh (đã được sửa ở Bước 1 để gọi Server)
+            // Gọi hàm refresh để lấy token mới từ Server
             var ok = await refreshTokenFromFirestore();
             
             if (ok) {
@@ -1030,7 +1030,7 @@ def build_custom_practice_js():
                 }
             } else {
                 if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast('⚠️ Không thể', 'warn');
+                    showUserChangedToast('⚠️ Không thể kết nối Server', 'warn');
                 }
                 tokenText.textContent = 'Lỗi mạng';
             }
