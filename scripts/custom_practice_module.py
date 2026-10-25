@@ -645,56 +645,47 @@ def build_custom_practice_js():
     }
 
     async function refreshTokenFromFirestore() {
-        if (!currentUser || !currentUser.email || typeof db === 'undefined' || !db) {
-            return false;
-        }
+        // ⭐ Gọi API check-token của Server để kích hoạt logic reset ngày/tháng
+        if (!currentUser || !currentUser.email) return false;
         
         try {
-            var doc = await db.collection('allowed_users').doc(currentUser.email).get({ source: 'server' });
-            if (!doc.exists) return false;
+            var res = await fetch(SERVER_API_URL.replace('/translate', '/user/check-token'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentUser.email })
+            });
+            var json = await res.json();
             
-            var freshData = doc.data();
-            currentUser.bonusTokens = freshData.bonusTokens || 0;
-            currentUser.tokensUsed = freshData.tokensUsed || 0;
-            // Nếu server trả về tokenQuota thì lấy, nếu không thì tự động gán theo role
-            if (freshData.tokenQuota) {
-                currentUser.tokenQuota = freshData.tokenQuota;
-            } else {
-                currentUser.tokenQuota = (currentUser.role === 'admin') ? 20000 : 10000;
-            }
-            currentUser.isPermanent = freshData.isPermanent || false;
-            currentUser.role = freshData.role || currentUser.role;
+            if (!json.ok) return false;
             
-            currentUser.isExpiredOnly = freshData.isExpiredOnly || false;
-            currentUser.tier = freshData.tier || null;
-            currentUser.appTier = freshData.appTier || null;
-            currentUser.expiryDate = freshData.expiryDate || null;
+            // Cập nhật lại dữ liệu từ Server trả về
+            myTokenQuota = json.quota;
+            myBonusTokens = json.bonus;
+            myTokensUsed = json.used;
+            currentUser.role = json.role;
             
-            myTokenQuota = currentUser.tokenQuota;
-            myBonusTokens = currentUser.bonusTokens;
-            myTokensUsed = currentUser.tokensUsed;
-            
+            // Lưu lại vào localStorage
             try {
                 var cacheKey = 'user_cache_' + currentUser.email;
                 var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
                 if (cached && cached.data) {
-                    cached.data.bonusTokens = currentUser.bonusTokens;
-                    cached.data.tokensUsed = currentUser.tokensUsed;
-                    cached.data.tokenQuota = currentUser.tokenQuota;
-                    cached.data.isPermanent = currentUser.isPermanent;
-                    cached.data.isExpiredOnly = currentUser.isExpiredOnly;
-                    cached.data.tier = currentUser.tier;
-                    cached.data.appTier = currentUser.appTier;
-                    cached.data.expiryDate = currentUser.expiryDate;
-                    
+                    cached.data.tokenQuota = json.quota;
+                    cached.data.bonusTokens = json.bonus;
+                    cached.data.tokensUsed = json.used;
+                    cached.data.role = json.role;
+                    if (json.lastTokenResetDate) cached.data.lastTokenResetDate = json.lastTokenResetDate;
+                    if (json.lastTokenResetMonth) cached.data.lastTokenResetMonth = json.lastTokenResetMonth;
                     localStorage.setItem(cacheKey, JSON.stringify(cached));
+                    currentUser = cached.data;
                 }
             } catch(e) {}
             
+            // Vẽ lại UI
             var isExpired = checkIsExpired();
             renderTokenUI(isExpired);
             return true;
         } catch(e) {
+            console.error('Lỗi cập nhật token:', e);
             return false;
         }
     }
@@ -983,12 +974,11 @@ def build_custom_practice_js():
     resetBtn.addEventListener('click', async function() {
         var currentText = inputArea.value;
 
-        // ⭐ TRƯỜNG HỢP 1: Nếu hiện tại đang có chữ -> Tiến hành xoá (lưu tạm)
+        // TRƯỜNG HỢP 1: Có chữ -> Xoá (Lưu tạm)
         if (currentText.trim() !== '') {
-            lastDeletedText = currentText; // Lưu lại để phòng bấm nhầm
-            inputArea.value = ''; // Xoá trắng
+            lastDeletedText = currentText; 
+            inputArea.value = ''; 
             
-            // Đổi icon nút thành "Khôi phục"
             resetBtn.innerHTML = '<i class="fas fa-undo"></i>';
             resetBtn.title = 'Bấm lần nữa để khôi phục văn bản';
             resetBtn.style.color = '#16a34a'; 
@@ -1001,12 +991,11 @@ def build_custom_practice_js():
             startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
             setTimeout(autoResizeTextarea, 50);
         } 
-        // ⭐ TRƯỜNG HỢP 2: Ô nhập đang trống & có chữ đã xoá -> Khôi phục lại
+        // TRƯỜNG HỢP 2: Đang trống & có chữ lưu tạm -> Khôi phục
         else if (lastDeletedText !== '') {
-            inputArea.value = lastDeletedText; // Trả lại văn bản
-            lastDeletedText = ''; // Xoá bộ nhớ tạm
+            inputArea.value = lastDeletedText; 
+            lastDeletedText = ''; 
             
-            // Trả nút về trạng thái bình thường
             resetBtn.innerHTML = '<i class="fas fa-rotate-right"></i>';
             resetBtn.title = 'Làm mới';
             resetBtn.style.color = '';
@@ -1015,7 +1004,7 @@ def build_custom_practice_js():
             updateCharCount();
             setTimeout(autoResizeTextarea, 50);
         } 
-        // ⭐ TRƯỜNG HỢP 3: Ô trống, không có chữ lưu tạm -> Bấm để Cập nhật Token
+        // TRƯỜNG HỢP 3: Đang trống -> Kiểm tra Token
         else {
             if (!currentUser || !currentUser.email) {
                 alert('Vui lòng đăng nhập để kiểm tra Token!');
@@ -1026,51 +1015,24 @@ def build_custom_practice_js():
                 return;
             }
 
-            // Đổi nút thành đang tải và KHÓA lại
+            // Khóa nút và hiện loading
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
-            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            tokenText.textContent = 'Đang kiểm tra...';
+            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spinrem"></i>';
+            tokenText;.textContent = 'Đang kiểm tra...';
 
-            try {
-                // ⭐ Gọi API mới lên Server
-                var res = await fetch(SERVER_API_URL.replace('/translate', '/user/check-token'), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: currentUser.email })
-                });
-                var json = await res.json();
-                
-                if (json.ok) {
-                    // Cập nhật lại biến & localStorage
-                    myTokenQuota = json.quota;
-                    myBonusTokens = json.bonus;
-                    myTokensUsed = json.used;
-                    
-                    var cacheKey = 'user_cache_' + currentUser.email;
-                    var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-                    if (cached && cached.data) {
-                        cached.data.tokenQuota = json.quota;
-                        cached.data.bonusTokens = json.bonus;
-                        cached.data.tokensUsed = json.used;
-                        cached.data.role = json.role;
-                        if (json.lastTokenResetDate) cached.data.lastTokenResetDate = json.lastTokenResetDate;
-                        if (json.lastTokenResetMonth) cached.data.lastTokenResetMonth = json.lastTokenResetMonth;
-                        localStorage.setItem(cacheKey, JSON.stringify(cached));
-                        currentUser = cached.data;
-                    }
-                    renderTokenUI(checkIsExpired()); // Cập nhật UI
-                    
-                    if (typeof showUserChangedToast === 'function') {
-                        showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
-                    }
-                } else {
-                    tokenText.textContent = 'Lỗi dữ liệu';
-                    if (typeof showUserChangedToast === 'function') showUserChangedToast('⚠️ Lỗi: ' + json.error, 'warn');
+            // Gọi hàm refresh (đã được sửa ở Bước 1 để gọi Server)
+            var ok = await refreshTokenFromFirestore();
+            
+            if (ok) {
+                if (typeof show marginUserChangedToast === '-leftfunction') {
+                    showUserChanged:Toast('✅ Đã2 cập nhật số dư Token mới nhất', 'success');
                 }
-            } catch (e) {
+            } else {
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('⚠️ Không thể kết nối Server', 'warn');
+                }
                 tokenText.textContent = 'Lỗi mạng';
-                if (typeof showUserChangedToast === 'function') showUserChangedToast('⚠️ Lỗi kết nối Server', 'warn');
             }
 
             // ⭐ Bắt đầu đếm ngược 60s
@@ -1082,10 +1044,10 @@ def build_custom_practice_js():
                 if (timeLeft <= 0) {
                     clearInterval(cooldownTimer);
                     resetBtn.disabled = false;
-                    resetBtn.innerHTML = originalHTML; // Trả lại icon xoay vòng
+                    resetBtn.innerHTML = originalHTML; 
                     resetBtn.title = 'Làm mới / Kiểm tra Token';
                 } else {
-                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
+                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75px;">' + timeLeft + 's</span>';
                 }
             }, 1000);
         }
