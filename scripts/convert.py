@@ -527,7 +527,7 @@ var _GRADING_FALLBACK_MESSAGES = {
 
 var _VIETNAMESE_DIACRITICS_REGEX = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i;
 
-var _PUNCT_CLEAN_REGEX = /[\s。，！？、；：""''「」『』（）《》〈〉【】〔〕?!.,;:'"()\[\]{}\-~`@#$%^&*+=|\\/<>]/g;
+var _PUNCT_CLEAN_REGEX = /[\s。，,！!？?、；;：:""''「」『』（）()《》〈〉【】〔〕.\-~`@#$%^&*+=|\\/<>]/g;
 
 function _cleanForCompare(str) {
     if (!str) return '';
