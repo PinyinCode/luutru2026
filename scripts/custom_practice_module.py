@@ -1351,6 +1351,9 @@ def build_custom_practice_js():
                     var word = seg.segment;
                     if (/[\u4e00-\u9fa5]/.test(word)) {
                         result.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
+                    } else if (/[\s,，.。!！?？;；:：]/.test(word)) {
+                        // Nếu là dấu câu hoặc khoảng trắng, đánh dấu đặc biệt để nối sau
+                        result.push('___PUNCT___' + word.trim() + '___PUNCT___');
                     } else {
                         result.push(word);
                     }
@@ -1360,12 +1363,16 @@ def build_custom_practice_js():
                 rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
             }
 
-            // ⭐ DỌN DẸP DẤU CÁCH THỪA QUANH DẤU CÂU
-            return rawPinyin
-                .replace(/\s+([,，.。!！?？;；:：])/g, '$1') // Xóa space TRƯỚC dấu câu
-                .replace(/([,，.。!！?？;；:：])\s+/g, '$1 ') // Đảm bảo SAU dấu câu chỉ có 1 space
-                .replace(/\s+$/g, '') // Xóa space ở cuối cùng của cả câu
-                .replace(/\s{2,}/g, ' '); // Gộp các space bị lặp lại thành 1
+            // ⭐ DỌN DẸP TRIỆT ĐỂ
+            // 1. Nối các chữ cái dính liền lại với nhau, bỏ khoảng trắng xung quanh dấu câu
+            // 2. Gắn dấu câu sát vào từ phía trước nó
+            // 3. Đảm bảo sau dấu câu có đúng 1 khoảng trắng
+            rawPinyin = rawPinyin.replace(/\s*___PUNCT___([,，.。!！?？;；:：]?)___PUNCT___\s*/g, function(match, p1) {
+                if (p1 === '') return ' '; // Nếu là khoảng trắng thì thay bằng 1 space
+                return p1 + ' '; // Nếu là dấu câu, trả về dấu câu + 1 space
+            });
+
+            return rawPinyin.trim();
 
         } catch (e) {
             return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
