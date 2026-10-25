@@ -54,16 +54,90 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .result-count b{color:var(--primary);font-weight:800}
 .result-count.empty{background:var(--danger-light);border-color:rgba(220,38,38,.3);color:var(--danger)}
 .result-count.empty i,.result-count.empty b{color:var(--danger)}
-.fab-group{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));right:20px;z-index:1000;display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;pointer-events:none}
-.fab-group > *{pointer-events:auto}
-.fab-btn{width:clamp(42px,5vw,52px);height:clamp(42px,5vw,52px);border-radius:50%;border:none;background:var(--surface);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(.95rem,1.2vw,1.15rem);box-shadow:var(--shadow-fab);transition:transform .2s,background .2s,color .2s;position:relative;border:2px solid var(--surface)}
-.fab-btn:hover{transform:scale(1.08);background:var(--primary-light);color:var(--primary-dark)}
-.fab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.fab-main{width:clamp(46px,5.5vw,56px);height:clamp(46px,5.5vw,56px);font-size:clamp(1.05rem,1.4vw,1.3rem);background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 8px 24px rgba(124,58,237,.4)}
-.fab-main i{transition:transform .3s}
-.fab-group.open .fab-main i{transform:rotate(180deg)}
-.fab-sub{opacity:0;transform:translateY(10px) scale(.8);pointer-events:none!important;transition:opacity .2s,transform .25s}
-.fab-group.open .fab-sub{opacity:1;transform:translateY(0) scale(1);pointer-events:auto!important}
+/* ═══════════════════════════════════════════════════════════ */
+/* FAB GROUP - FIX CỨNG KÍCH THƯỚC TRÊN MỌI THIẾT BỊ          */
+/* ═══════════════════════════════════════════════════════════ */
+.fab-group {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    pointer-events: none;
+}
+.fab-group > * { pointer-events: auto; }
+
+.fab-btn {
+    width: 48px;   /* ⭐ Cố định 48px */
+    height: 48px;  /* ⭐ Cố định 48px */
+    border-radius: 50%;
+    border: none;
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-fab);
+    transition: transform 0.2s, background 0.2s, color 0.2s;
+    position: relative;
+    border: 2px solid var(--surface);
+    flex-shrink: 0; /* ⭐ Không cho phép co lại */
+}
+.fab-btn:hover {
+    transform: scale(1.08);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+.fab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+.fab-main {
+    width: 56px;   /* ⭐ Cố định 56px */
+    height: 56px;  /* ⭐ Cố định 56px */
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+}
+.fab-main i { transition: transform 0.3s; }
+.fab-group.open .fab-main i { transform: rotate(180deg); }
+
+.fab-sub {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    pointer-events: none !important;
+    transition: opacity 0.2s, transform 0.25s;
+}
+.fab-group.open .fab-sub {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto !important;
+}
+
+/* ⭐ Mobile: thu nhỏ nhẹ nhưng vẫn cố định, không dùng vw */
+@media (max-width: 768px) {
+    .fab-group {
+        right: 16px;
+        gap: 8px;
+    }
+    .fab-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+    }
+    .fab-main {
+        width: 52px;
+        height: 52px;
+        font-size: 1.2rem;
+    }
+}
 body:not(.show-pinyin) .card-pinyin{display:none!important}
 body:not(.show-vi) .card-vi{display:none!important}
 body:not(.show-practice) .card-practice{display:none!important}
@@ -739,7 +813,7 @@ body.show-practice .card-body{background:linear-gradient(135deg,var(--surface-2)
     color:var(--primary-dark);
     background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(37,99,235,.04));
     padding:.3rem .7rem;
-    border-radius:8px !important; /* ⭐ Thêm !important ở đây */
+    border-radius:50px;
     display:inline-block;
     font-weight:500;
     border:1px solid rgba(37,99,235,.15);
@@ -1252,10 +1326,13 @@ body.practice-full-open .pf-tiktok-float {
 /* ============================================================ */
 /* NAV - 3 NUT TO DEU NHAU + MINI GROUP                          */
 /* ============================================================ */
+/* ═══════════════════════════════════════════════════════════ */
+/* NAV - FIX CỨNG KÍCH THƯỚC TRÊN MỌI THIẾT BỊ                 */
+/* ═══════════════════════════════════════════════════════════ */
 .practice-full-nav{
     display:flex;
-    gap:.65rem;
-    padding:.65rem 1rem;
+    gap:10px;
+    padding:12px 16px;
     background:var(--surface);
     border-top:1px solid var(--border);
     flex:0 0 auto;
@@ -1264,9 +1341,10 @@ body.practice-full-open .pf-tiktok-float {
     min-height:72px;
 }
 
+/* ⭐ Nút cơ bản - Cố định 50px */
 .pf-nav-icon{
-    width:clamp(42px,5vw,50px);
-    height:clamp(42px,5vw,50px);
+    width:50px;
+    height:50px;
     border-radius:50%;
     border:1.5px solid var(--border);
     background:var(--surface);
@@ -1275,10 +1353,10 @@ body.practice-full-open .pf-tiktok-float {
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    font-size:clamp(.95rem,1.15vw,1.1rem);
+    font-size:1.1rem;
     font-family:inherit;
     padding:0;
-    flex-shrink:0;
+    flex-shrink:0; /* ⭐ Không cho phép co lại */
     transition:transform .15s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s,border-color .2s,box-shadow .2s,opacity .2s;
     box-shadow:0 2px 6px rgba(15,23,42,.06);
     position:relative;
@@ -1288,10 +1366,11 @@ body.practice-full-open .pf-tiktok-float {
     cursor:not-allowed;
 }
 
+/* ⭐ Nút chính (Next, Prev) - Cố định 64px */
 .pf-nav-icon.main-nav{
-    width:clamp(56px,7vw,68px);
-    height:clamp(56px,7vw,68px);
-    font-size:clamp(1.3rem,1.8vw,1.6rem);
+    width:64px;
+    height:64px;
+    font-size:1.5rem;
     border-width:2px;
 }
 .pf-nav-icon.main-nav:not(.primary):not(.speak){
@@ -1353,10 +1432,11 @@ body.practice-full-open .pf-tiktok-float {
     animation:stopPulse .8s ease-in-out infinite;
 }
 
+/* ⭐ Nút phụ (Random, Voice) - Cố định 48px */
 .pf-nav-icon.mini-nav{
-    width:clamp(44px,5vw,52px);
-    height:clamp(44px,5vw,52px);
-    font-size:clamp(.9rem,1.1vw,1rem);
+    width:48px;
+    height:48px;
+    font-size:1rem;
     border-width:1.5px;
     opacity:.85;
 }
@@ -1424,9 +1504,9 @@ body.practice-full-open .pf-tiktok-float {
 
 .practice-full-nav .mini-group{
     display:flex;
-    gap:.35rem;
-    margin-left:.5rem;
-    padding-left:.75rem;
+    gap:6px;
+    margin-left:8px;
+    padding-left:12px;
     border-left:1.5px solid var(--border);
 }
 
@@ -1441,32 +1521,49 @@ body.practice-full-open .pf-tiktok-float {
     color:#93c5fd;
 }
 
+/* ⭐ Mobile: Cố định nhưng nhỏ hơn một chút */
 @media(max-width:768px){
     .practice-full-nav{
-        gap:.5rem;
-        padding:.55rem .7rem;
+        gap:8px;
+        padding:10px 12px;
         min-height:66px;
     }
+    .pf-nav-icon{
+        width:46px;
+        height:46px;
+        font-size:1rem;
+    }
     .pf-nav-icon.main-nav{
-        width:54px;
-        height:54px;
-        font-size:1.25rem;
+        width:56px;
+        height:56px;
+        font-size:1.3rem;
     }
     .pf-nav-icon.mini-nav{
         width:44px;
         height:44px;
-        font-size:.9rem;
+        font-size:.95rem;
+    }
+    .practice-full-nav .mini-group{
+        gap:4px;
+        margin-left:4px;
+        padding-left:8px;
     }
 }
+
 @media(max-width:400px){
     .practice-full-nav{
-        gap:.4rem;
-        padding:.5rem .5rem;
+        gap:6px;
+        padding:8px 10px;
+    }
+    .pf-nav-icon{
+        width:42px;
+        height:42px;
+        font-size:.9rem;
     }
     .pf-nav-icon.main-nav{
-        width:50px;
-        height:50px;
-        font-size:1.15rem;
+        width:52px;
+        height:52px;
+        font-size:1.2rem;
     }
     .pf-nav-icon.mini-nav{
         width:40px;
@@ -1474,8 +1571,9 @@ body.practice-full-open .pf-tiktok-float {
         font-size:.85rem;
     }
     .practice-full-nav .mini-group{
-        gap:.25rem;
-        padding-left:.5rem;
+        gap:3px;
+        margin-left:2px;
+        padding-left:6px;
     }
 }
 
@@ -6935,7 +7033,7 @@ function render(reset) {
             '<div class="card-header">' +
                 '<div class="card-stt">' + sttSafe + '</div>' +
                 '<div class="card-meta">' +
-                    (r.hsk && r.subject !== 'Custom' && r.subject !== 'History' ? '<span class="card-tag hsk">' + escapeHtml(r.hsk) + '</span>' : '') +
+                    (r.hsk ? '<span class="card-tag hsk">' + escapeHtml(r.hsk) + '</span>' : '') +
                     topicTag +
                     subjectTag +
                     excelBadge +
