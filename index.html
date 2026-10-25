@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -13571,19 +13574,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13742,7 +13733,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-robot"></i>
     </div>
@@ -38992,15 +38983,16 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                 return;
             }
 
-            // Khóa nút và hiện loading
+            // 1. Khóa nút và hiện loading
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
             resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             tokenText.textContent = 'Đang kiểm tra...';
 
-            // Gọi hàm refresh để lấy token mới từ Server
+            // 2. Gọi API lấy token mới từ Server và CHỜ kết quả
             var ok = await refreshTokenFromFirestore();
             
+            // 3. Hiển thị thông báo & cập nhật giao diện NGAY LẬP TỨC
             if (ok) {
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
@@ -39012,7 +39004,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                 tokenText.textContent = 'Lỗi mạng';
             }
 
-            // ⭐ Bắt đầu đếm ngược 60s
+            // 4. SAU KHI CẬP NHẬT XONG MỚI BẮT ĐẦU ĐẾM NGƯỢC 60s
             var timeLeft = 60;
             resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
             
@@ -39029,7 +39021,6 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             }, 1000);
         }
     });
-
     function showSpellModal(words) {
         return new Promise(function(resolve) {
             modalWordsList.textContent = words.join(', ');
