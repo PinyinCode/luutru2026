@@ -969,9 +969,13 @@ def build_custom_practice_js():
         }
     }
 
-    function findSuspiciousWords() {
+        function findSuspiciousWords() {
         if (currentMode !== 'vi2zh') return [];
         var text = inputArea.value;
+        
+        // ⭐ Bỏ qua hoàn toàn nếu văn bản chứa chữ Trung Quốc (dù đang ở chế độ nào)
+        if (/[\u4e00-\u9fa5]/.test(text)) return [];
+
         var rawWords = text.split(/\s+/);
         var suspicious = [];
         var whitelist = ['tr', 'và', 'của', 'cho', 'với', 'để', 'là', 'có', 'không', 'những', 'các', 'được'];
@@ -992,6 +996,7 @@ def build_custom_practice_js():
         }
         return suspicious;
     }
+
 
     function checkSpellingSuggestions() {
         var suspiciousWords = findSuspiciousWords();
