@@ -1015,15 +1015,16 @@ def build_custom_practice_js():
                 return;
             }
 
-            // Khóa nút và hiện loading
+            // 1. Khóa nút và hiện loading
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
             resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             tokenText.textContent = 'Đang kiểm tra...';
 
-            // Gọi hàm refresh để lấy token mới từ Server
+            // 2. Gọi API lấy token mới từ Server và CHỜ kết quả
             var ok = await refreshTokenFromFirestore();
             
+            // 3. Hiển thị thông báo & cập nhật giao diện NGAY LẬP TỨC
             if (ok) {
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
@@ -1035,7 +1036,7 @@ def build_custom_practice_js():
                 tokenText.textContent = 'Lỗi mạng';
             }
 
-            // ⭐ Bắt đầu đếm ngược 60s
+            // 4. SAU KHI CẬP NHẬT XONG MỚI BẮT ĐẦU ĐẾM NGƯỢC 60s
             var timeLeft = 60;
             resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
             
@@ -1052,7 +1053,6 @@ def build_custom_practice_js():
             }, 1000);
         }
     });
-
     function showSpellModal(words) {
         return new Promise(function(resolve) {
             modalWordsList.textContent = words.join(', ');
