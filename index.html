@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -9526,10 +9529,11 @@ html body .card-zh{
 html body .card.focused .card-zh{
     font-size:calc(clamp(1.7rem,3.4vmin,2.6rem) * var(--ui-scale,1))!important
 }
-html body .card-pinyin {
-    padding: calc(clamp(.28rem,.55vmin,.45rem) * var(--ui-scale,1)) calc(clamp(.6rem,1.2vmin,.95rem) * var(--ui-scale,1)) !important;
-    font-size: calc(clamp(.8rem,1.5vmin,1.1rem) * var(--ui-scale,1)) !important;
-    border-radius: 8px !important; /* ⭐ Sửa dòng này */
+html body .card-pinyin{
+    padding:calc(clamp(.28rem,.55vmin,.45rem) * var(--ui-scale,1))
+             calc(clamp(.6rem,1.2vmin,.95rem) * var(--ui-scale,1))!important;
+    font-size:calc(clamp(.8rem,1.5vmin,1.1rem) * var(--ui-scale,1))!important;
+    border-radius:calc(clamp(50px,7vmin,100px) * var(--ui-scale,1))!important
 }
 html body .card-body{
     margin-bottom:calc(clamp(.6rem,1.2vmin,1rem) * var(--ui-scale,1))!important
@@ -13573,19 +13577,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13744,7 +13736,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-robot"></i>
     </div>
