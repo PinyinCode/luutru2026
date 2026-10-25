@@ -11818,6 +11818,27 @@ html body .tiktok-float-btn > i {
 }
 
 
+/* ⭐ CSS Modal Cắt Ảnh (Crop) */
+.cp-crop-container {
+    max-width: 90% !important;
+    width: 600px !important;
+    text-align: left !important;
+}
+.cp-crop-img-wrap {
+    max-height: 50vh;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cp-crop-img-wrap img {
+    max-width: 100%;
+    display: block;
+}
+
+
 
 /* FIX.PY: AUTO-FIT LAYOUT */
 @media (max-width: 768px) {
@@ -13881,7 +13902,7 @@ body.has-floating-group #quickSearchRoot{
               <i class="fas fa-bolt"></i> <span id="cpTokenText">Đang tải...</span>
               <span class="refresh-hint">🔄</span>
             </div>
-            <!-- ⭐ NÚT TẢI ẢNH ĐÃ ĐƯỢC THÊM VÀO ĐÂY -->
+            <!-- ⭐ NÚT TẢI ẢNH -->
             <button class="cp-btn-reset" id="cpUploadImgBtn" type="button" title="Dịch từ ảnh">
                 <i class="fas fa-camera"></i>
             </button>
@@ -13961,6 +13982,24 @@ body.has-floating-group #quickSearchRoot{
             </div>
         </div>
         <div id="cpHistoryList" style="max-height: 400px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+        </div>
+    </div>
+</div>
+
+<!-- ⭐ MODAL CẮT ẢNH (CROPPER) -->
+<div class="cp-modal-overlay" id="cpCropModalOverlay">
+    <div class="cp-modal-box cp-crop-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border, #e2e8f0); padding-bottom: 10px;">
+            <h4 class="cp-modal-title" style="font-size: 1.1rem; margin:0;"><i class="fas fa-crop"></i> Cắt sát vùng văn bản</h4>
+            <button type="button" id="cpCropCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#64748b;"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="cp-modal-desc" style="margin:0; font-size: 0.8rem;">Kéo các góc để chọn đúng phần chữ cần đọc (giúp tiết kiệm token và tăng độ chính xác):</p>
+        <div class="cp-crop-img-wrap">
+            <img id="cpImageToCrop" src="" alt="Crop Preview">
+        </div>
+        <div class="cp-modal-actions" style="margin-top: 5px;">
+            <button class="cp-modal-btn cp-modal-btn-cancel" id="cpCropCancelBtn" type="button">Hủy bỏ</button>
+            <button class="cp-modal-btn cp-modal-btn-proceed" id="cpCropConfirmBtn" type="button"><i class="fas fa-check"></i> Cắt & Đọc ảnh</button>
         </div>
     </div>
 </div>
@@ -39664,10 +39703,36 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             }
         });
     }
+        // ⭐ Bổ sung hàm tải thư viện Cropper.js động từ CDN
+    function loadCropperLibrary() {
+        if (window.Cropper) return Promise.resolve();
+        return new Promise(function(resolve) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css';
+            document.head.appendChild(link);
+
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js';
+            script.onload = resolve;
+            script.onerror = resolve;
+            document.head.appendChild(script);
+        });
+    }
+
 
        // ⭐ XỬ LÝ DỊCH ẢNH (CÓ NÉN ẢNH ĐỂ TIẾT KIỆM TOKEN)
     var uploadImgBtn = document.getElementById('cpUploadImgBtn');
     var imageInput = document.getElementById('cpImageInput');
+    
+    // ⭐ Bổ sung khai báo các biến Modal Crop còn thiếu ở đây:
+    var cropperInstance = null;
+    var cropModalOverlay = document.getElementById('cpCropModalOverlay');
+    var imageToCrop = document.getElementById('cpImageToCrop');
+    var cropConfirmBtn = document.getElementById('cpCropConfirmBtn');
+    var cropCancelBtn = document.getElementById('cpCropCancelBtn');
+    var cropCloseBtn = document.getElementById('cpCropCloseBtn');
+
 
     // Hàm nén ảnh bằng Canvas của trình duyệt
     function resizeImage(file, maxSize = 1200) {
@@ -39705,7 +39770,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
         });
     }
 
-    if (uploadImgBtn && imageInput) {
+        if (uploadImgBtn && imageInput) {
         uploadImgBtn.addEventListener('click', function() {
             if (!currentUser) { alert('Vui lòng đăng nhập để sử dụng!'); return; }
             
@@ -39720,98 +39785,152 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             }
             imageInput.click();
         });
+    }
 
+    // ⭐ KHI CHỌN ẢNH -> MỞ MODAL CROP THAY VÌ GỬI LUÔN
+    if (imageInput) {
         imageInput.addEventListener('change', async function(e) {
             if (!e.target.files || e.target.files.length === 0) return;
-            
-            var originalFile = e.target.files[0];
+            var file = e.target.files[0];
             
             var originalHTML = uploadImgBtn.innerHTML;
             uploadImgBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             uploadImgBtn.disabled = true;
-            
-            progressWrap.classList.add('show');
-            progressBar.style.width = '20%';
-            progressText.textContent = 'Đang tối ưu ảnh...';
 
             try {
-                // Nén ảnh trước khi gửi
-                var resizedBlob = await resizeImage(originalFile, 1200);
-
-                progressBar.style.width = '50%';
-                progressText.textContent = 'Đang nhận diện văn bản...';
-
-                var formData = new FormData();
-                formData.append('image', resizedBlob, 'image.jpg');
-                formData.append('email', currentUser.email);
-
-                var res = await fetch(SERVER_API_URL.replace('/translate', '/translate-image'), {
-                    method: 'POST',
-                    body: formData
-                });
+                await loadCropperLibrary();
                 
-                var json = await res.json();
-                if (json.error) throw new Error(json.error);
-                
-                // ⭐ SỬ DỤNG original_text THAY VÌ translated
-                inputArea.value = json.original_text;
-                updateCharCount();
-                
-                // ⭐ TỰ ĐỘNG CHUYỂN NÚT NẾU NGÔN NGỮ ẢNH KHÁC VỚI LỰA CHỌN HIỆN TẠI
-                if (json.detected_source === 'zh' && currentMode !== 'zh2vi') {
-                    currentMode = 'zh2vi';
-                    labelVi.classList.remove('active');
-                    labelZh.classList.add('active');
-                    if (!inputArea.disabled) inputArea.placeholder = 'Dán văn bản tiếng Trung vào đây...';
-                } else if (json.detected_source === 'vi' && currentMode !== 'vi2zh') {
-                    currentMode = 'vi2zh';
-                    labelZh.classList.remove('active');
-                    labelVi.classList.add('active');
-                    if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
-                }
-                
-                // ⭐ TRỪ TOKEN VÀ CẬP NHẬT UI NGAY LẬP TỨC (Dùng Number() chống nối chuỗi)
-                if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
-                    if (typeof json.totalTokensUsed === 'number') {
-                        myTokensUsed = json.totalTokensUsed;
-                    } else {
-                        myTokensUsed += Number(json.tokensUsed);
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    imageToCrop.src = evt.target.result;
+                    cropModalOverlay.classList.add('show');
+                    
+                    if (cropperInstance) {
+                        cropperInstance.destroy();
                     }
                     
-                    if (currentUser) {
-                        currentUser.tokensUsed = myTokensUsed;
-                    }
-
-                    try {
-                        var cacheKey = 'user_cache_' + currentUser.email;
-                        var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-                        if (cached && cached.data) { 
-                            cached.data.tokensUsed = myTokensUsed; 
-                            localStorage.setItem(cacheKey, JSON.stringify(cached)); 
-                        }
-                    } catch(e) {}
-
-                    renderTokenUI(checkIsExpired());
-                }
-
-                // ⭐ THÔNG BÁO ĐÚNG BẢN CHẤT (ĐÃ ĐỌC ẢNH, CHƯA DỊCH)
-                if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast('✅ Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token). Vui lòng bấm Bắt đầu để dịch!', 'success');
-                } else {
-                    alert('Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token).');
-                }
-                
+                    cropperInstance = new Cropper(imageToCrop, {
+                        aspectRatio: NaN, // Tự do kéo cắt mọi tỷ lệ
+                        viewMode: 1,
+                        autoCropArea: 0.95,
+                        responsive: true,
+                    });
+                    
+                    uploadImgBtn.innerHTML = originalHTML;
+                    uploadImgBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
             } catch(err) {
-                alert('Lỗi đọc ảnh: ' + err.message);
-            } finally {
+                alert('Không thể tải công cụ cắt ảnh: ' + err.message);
                 uploadImgBtn.innerHTML = originalHTML;
                 uploadImgBtn.disabled = false;
                 imageInput.value = '';
-                progressWrap.classList.remove('show');
-                progressBar.style.width = '0%';
             }
         });
     }
+
+    // ⭐ XÁC NHẬN CẮT, CHUYỂN TRẮNG ĐEN & GỬI LÊN API
+    if (cropConfirmBtn) {
+        cropConfirmBtn.addEventListener('click', async function() {
+            if (!cropperInstance) return;
+            
+            cropModalOverlay.classList.remove('show');
+            progressWrap.classList.add('show');
+            progressBar.style.width = '30%';
+            progressText.textContent = 'Đang xử lý ảnh tối ưu (Trắng đen)...';
+
+            var canvas = cropperInstance.getCroppedCanvas({
+                maxWidth: 900,
+                maxHeight: 900
+            });
+            
+            var ctx = canvas.getContext('2d');
+            var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imgData.data;
+            for (var i = 0; i < data.length; i += 4) {
+                var avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                data[i] = avg;     
+                data[i + 1] = avg; 
+                data[i + 2] = avg; 
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            canvas.toBlob(async function(blob) {
+                try {
+                    progressBar.style.width = '60%';
+                    progressText.textContent = 'Đang nhận diện văn bản (OCR)...';
+
+                    var formData = new FormData();
+                    formData.append('image', blob, 'grayscale-cropped.jpg');
+                    formData.append('email', currentUser.email);
+
+                    var res = await fetch(SERVER_API_URL.replace('/translate', '/translate-image'), {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    var json = await res.json();
+                    if (json.error) throw new Error(json.error);
+                    
+                    inputArea.value = json.original_text;
+                    updateCharCount();
+                    
+                    if (json.detected_source === 'zh' && currentMode !== 'zh2vi') {
+                        currentMode = 'zh2vi';
+                        labelVi.classList.remove('active');
+                        labelZh.classList.add('active');
+                        if (!inputArea.disabled) inputArea.placeholder = 'Dán văn bản tiếng Trung vào đây...';
+                    } else if (json.detected_source === 'vi' && currentMode !== 'vi2zh') {
+                        currentMode = 'vi2zh';
+                        labelZh.classList.remove('active');
+                        labelVi.classList.add('active');
+                        if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
+                    }
+                    
+                    if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                        if (typeof json.totalTokensUsed === 'number') {
+                            myTokensUsed = json.totalTokensUsed;
+                        } else {
+                            myTokensUsed += Number(json.tokensUsed);
+                        }
+                        
+                        if (currentUser) {
+                            currentUser.tokensUsed = myTokensUsed;
+                        }
+
+                        try {
+                            var cacheKey = 'user_cache_' + currentUser.email;
+                            var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                            if (cached && cached.data) { 
+                                cached.data.tokensUsed = myTokensUsed; 
+                                localStorage.setItem(cacheKey, JSON.stringify(cached)); 
+                            }
+                        } catch(e) {}
+
+                        renderTokenUI(checkIsExpired());
+                    }
+
+                    if (typeof showUserChangedToast === 'function') {
+                        showUserChangedToast('✅ Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token). Vui lòng bấm Bắt đầu để dịch!', 'success');
+                    } else {
+                        alert('Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token).');
+                    }
+                    
+                } catch(err) {
+                    alert('Lỗi đọc ảnh: ' + err.message);
+                } finally {
+                    imageInput.value = '';
+                    progressWrap.classList.remove('show');
+                    progressBar.style.width = '0%';
+                    if (cropperInstance) {
+                        cropperInstance.destroy();
+                        cropperInstance = null;
+                    }
+                }
+            }, 'image/jpeg', 0.75);
+        });
+    }
+
 
     setTimeout(initTokenState, 100);
     setTimeout(initTokenState, 1500);
