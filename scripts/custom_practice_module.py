@@ -1015,16 +1015,16 @@ def build_custom_practice_js():
                 return;
             }
 
-            // 1. Khóa nút và hiện loading
+            // 1. Đổi icon thành đang tải và KHÓA nút
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
             resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             tokenText.textContent = 'Đang kiểm tra...';
 
-            // 2. Gọi API lấy token mới từ Server và CHỜ kết quả
+            // 2. Gọi API lấy token mới từ Server
             var ok = await refreshTokenFromFirestore();
             
-            // 3. Hiển thị thông báo & cập nhật giao diện NGAY LẬP TỨC
+            // 3. Cập nhật giao diện ngay lập tức
             if (ok) {
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
@@ -1036,21 +1036,14 @@ def build_custom_practice_js():
                 tokenText.textContent = 'Lỗi mạng';
             }
 
-            // 4. SAU KHI CẬP NHẬT XONG MỚI BẮT ĐẦU ĐẾM NGƯỢC 60s
-            var timeLeft = 60;
-            resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
+            // 4. Bắt đầu khóa nút 60s (Không hiện đếm ngược, chỉ hiện icon xoay vòng mờ đi)
+            resetBtn.innerHTML = originalHTML; // Trả lại icon xoay vòng ban đầu
             
-            var cooldownTimer = setInterval(function() {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    clearInterval(cooldownTimer);
-                    resetBtn.disabled = false;
-                    resetBtn.innerHTML = originalHTML; 
-                    resetBtn.title = 'Làm mới / Kiểm tra Token';
-                } else {
-                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
-                }
-            }, 1000);
+            // Đặt thời gian chờ 60s
+            setTimeout(function() {
+                resetBtn.disabled = false; // Mở khóa nút sau 60s
+                resetBtn.title = 'Làm mới / Kiểm tra Token';
+            }, 60000);
         }
     });
     function showSpellModal(words) {
