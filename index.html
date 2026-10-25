@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -13683,19 +13686,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13854,7 +13845,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-robot"></i>
     </div>
@@ -39892,7 +39883,8 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                         if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
                     }
                     
-                    if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                                        if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                        // 1. Cập nhật biến cục bộ ngay lập tức để ép hiển thị
                         if (typeof json.totalTokensUsed === 'number') {
                             myTokensUsed = json.totalTokensUsed;
                         } else {
@@ -39903,45 +39895,34 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                             currentUser.tokensUsed = myTokensUsed;
                         }
 
-                        // 1. Lưu vào cache local
-                        try {
-                            var cacheKey = 'user_cache_' + currentUser.email;
-                            var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-                            if (cached && cached.data) { 
-                                cached.data.tokensUsed = myTokensUsed; 
-                                localStorage.setItem(cacheKey, JSON.stringify(cached)); 
-                            }
-                        } catch(e) {}
-
-                        // 2. Tính toán và gán CỨNG số token vào thanh hiển thị
+                        // 2. Tính toán và gán trực tiếp vào giao diện (Bắt buộc Chrome phải vẽ lại DOM ngay)
                         var totalAvailable = myTokenQuota + myBonusTokens;
                         var remain = totalAvailable - myTokensUsed;
                         if (remain < 0) remain = 0;
                         
-                        // Ép Chrome cập nhật text trực tiếp, không thông qua hàm nào khác
                         if (tokenText) {
                             tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
                         }
                         
-                        // Ép Chrome đổi màu Badge (để nó bắt buộc phải vẽ lại DOM)
                         if (remain <= 2000) {
                             tokenBadge.classList.add('danger');
+                            tokenBadge.classList.remove('warn');
                         } else if (remain <= 5000) {
                             tokenBadge.classList.add('warn');
+                            tokenBadge.classList.remove('danger');
                         } else {
                             tokenBadge.classList.remove('warn', 'danger');
                         }
 
-                        // 3. Dùng requestAnimationFrame kết hợp setTimeout (Đòn quyết định)
+                        // 3. Ép Chrome render lại khung hình tức thì
                         requestAnimationFrame(function() {
                             if (tokenText) {
                                 tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
                             }
-                            // Đợi 100ms rồi gọi hàm render tổng thể để đồng bộ mọi thứ khác
-                            setTimeout(function() {
-                                renderTokenUI(checkIsExpired());
-                            }, 100);
                         });
+
+                        // 4. Gọi ngầm đồng bộ từ Server để chuẩn xác 100%
+                        refreshTokenFromFirestore();
                     }
 
                     if (typeof showUserChangedToast === 'function') {
