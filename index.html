@@ -39399,45 +39399,50 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
     }
 
     function getSmartPinyin(text) {
-        if (!text) return '';
-        if (!window.pinyinPro) return text;
+    if (!text) return '';
+    if (!window.pinyinPro) return text;
 
-        try {
-            var rawPinyin = '';
-            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-                var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
-                var result = [];
-                for (var seg of segmenter.segment(text)) {
-                    var word = seg.segment;
-                    if (/[\u4e00-\u9fa5]/.test(word)) {
-                        result.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
-                    } else if (/[\s,，.。!！?？;；:：]/.test(word)) {
-                        // Nếu là dấu câu hoặc khoảng trắng, đánh dấu đặc biệt để nối sau
-                        result.push('___PUNCT___' + word.trim() + '___PUNCT___');
-                    } else {
-                        result.push(word);
-                    }
+    try {
+        var rawPinyin = '';
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+            var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+            var parts = [];
+            for (var seg of segmenter.segment(text)) {
+                var word = seg.segment;
+                if (/[\u4e00-\u9fa5]/.test(word)) {
+                    parts.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
+                } else if (/[\s\n\r\t]+/.test(word)) {
+                    parts.push(' ');
+                } else {
+                    parts.push(word);
                 }
-                rawPinyin = result.join(' ');
-            } else {
-                rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
             }
-
-            // ⭐ DỌN DẸP TRIỆT ĐỂ
-            // 1. Nối các chữ cái dính liền lại với nhau, bỏ khoảng trắng xung quanh dấu câu
-            // 2. Gắn dấu câu sát vào từ phía trước nó
-            // 3. Đảm bảo sau dấu câu có đúng 1 khoảng trắng
-            rawPinyin = rawPinyin.replace(/\s*___PUNCT___([,，.。!！?？;；:：]?)___PUNCT___\s*/g, function(match, p1) {
-                if (p1 === '') return ' '; // Nếu là khoảng trắng thì thay bằng 1 space
-                return p1 + ' '; // Nếu là dấu câu, trả về dấu câu + 1 space
-            });
-
-            return rawPinyin.trim();
-
-        } catch (e) {
-            return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+            // Nối trực tiếp các phần tử thay vì dùng join(' ') để tránh phát sinh khoảng trắng thừa
+            rawPinyin = parts.join('');
+        } else {
+            rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
         }
+
+        // ⭐ DỌN DẸP KHOẢNG TRẮNG QUANH DẤU CÂU
+        return rawPinyin
+            // 1. Xóa toàn bộ khoảng trắng nằm trước dấu câu
+            .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
+            // 2. Đảm bảo sau dấu câu có đúng 1 khoảng trắng (nếu phía sau là chữ cái)
+            .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
+            // 3. Gom các khoảng trắng thừa liên tiếp thành 1 khoảng trắng duy nhất và cắt bỏ 2 đầu
+            .replace(/\s+/g, ' ')
+            .trim();
+
+    } catch (e) {
+        var fallbackPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+        return fallbackPinyin
+            .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
+            .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
+            .replace(/\s+/g, ' ')
+            .trim();
     }
+}
+
 
     async function fetchTranslate(text, mode) {
         var translated = '';
