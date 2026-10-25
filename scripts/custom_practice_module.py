@@ -374,6 +374,35 @@ def build_custom_practice_css():
 .cp-hidden {
     display: none !important;
 }
+/* ⭐ Phóng to toàn màn hình Textarea */
+.cp-input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.cp-input-wrapper.fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background: var(--surface, #ffffff) !important;
+    padding: 2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5) !important;
+    overflow-y: auto !important;
+}
+.cp-input-wrapper.fullscreen .cp-textarea {
+    flex: 1 !important;
+    min-height: calc(100vh - 200px) !important;
+    max-height: none !important;
+    font-size: 1.15rem !important;
+}
+[data-theme="dark"] .cp-input-wrapper.fullscreen {
+    background: var(--surface-2, #1e1b4b) !important;
+}
+
 """
 
 def build_custom_practice_html():
@@ -394,6 +423,12 @@ def build_custom_practice_html():
               <i class="fas fa-bolt"></i> <span id="cpTokenText">Đang tải...</span>
               <span class="refresh-hint">🔄</span>
             </div>
+            <!-- ⭐ NÚT TẢI ẢNH ĐÃ ĐƯỢC THÊM VÀO ĐÂY -->
+            <button class="cp-btn-reset" id="cpUploadImgBtn" type="button" title="Dịch từ ảnh">
+                <i class="fas fa-camera"></i>
+            </button>
+            <input type="file" id="cpImageInput" accept="image/*" style="display:none;">
+            
             <button class="cp-btn-reset" id="cpHistoryBtn" type="button" title="Xem lịch sử">
                 <i class="fas fa-clock-rotate-left"></i>
             </button>
@@ -409,7 +444,13 @@ def build_custom_practice_html():
         <span class="cp-switch-label" id="cpLabelZh">Tiếng Trung</span>
     </div>
 
-    <div class="cp-input-wrapper">
+    <div class="cp-input-wrapper" id="cpInputWrapper">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-3, #64748b);">Nội dung văn bản</span>
+            <button type="button" id="cpExpandBtn" class="cp-btn-reset" style="padding: 3px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;" title="Phóng to toàn màn hình">
+                <i class="fas fa-expand" id="cpExpandIcon"></i> <span id="cpExpandText">Phóng to</span>
+            </button>
+        </div>
         <textarea class="cp-textarea" id="cpInputZh" rows="4" placeholder="Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn..."></textarea>
         <div class="cp-spell-container" id="cpSpellContainer">
             <div class="cp-spell-header">
@@ -466,6 +507,7 @@ def build_custom_practice_html():
     </div>
 </div>
 """
+
 
 def build_custom_practice_js():
     return r"""
@@ -532,6 +574,28 @@ def build_custom_practice_js():
     } else {
         loadPinyinPro();
     }
+        // ⭐ XỬ LÝ PHÓNG TO / THU NHỎ TEXTAREA TOÀN MÀN HÌNH
+    var expandBtn = document.getElementById('cpExpandBtn');
+    var inputWrapper = document.getElementById('cpInputWrapper');
+    var expandIcon = document.getElementById('cpExpandIcon');
+    var expandText = document.getElementById('cpExpandText');
+
+    if (expandBtn && inputWrapper) {
+        expandBtn.addEventListener('click', function() {
+            var isFullscreen = inputWrapper.classList.toggle('fullscreen');
+            if (isFullscreen) {
+                expandIcon.className = 'fas fa-compress';
+                expandText.textContent = 'Thu nhỏ';
+                expandBtn.title = 'Thu nhỏ lại';
+            } else {
+                expandIcon.className = 'fas fa-expand';
+                expandText.textContent = 'Phóng to';
+                expandBtn.title = 'Phóng to toàn màn hình';
+            }
+            autoResizeTextarea();
+        });
+    }
+
 
     // ⭐ HÀM KIỂM TRA TRẠNG THÁI HẾT HẠN (Ưu tiên kiểm tra biến toàn cục & banner DOM đầu tiên)
     function checkIsExpired() {
@@ -933,7 +997,7 @@ def build_custom_practice_js():
             labelVi.classList.add('active');
             if (!inputArea.disabled) inputArea.placeholder = 'Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn...';
         }
-        inputArea.value = '';
+        
         updateCharCount();
     });
 
@@ -1571,6 +1635,154 @@ def build_custom_practice_js():
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
                 }
+            }
+        });
+    }
+
+       // ⭐ XỬ LÝ DỊCH ẢNH (CÓ NÉN ẢNH ĐỂ TIẾT KIỆM TOKEN)
+    var uploadImgBtn = document.getElementById('cpUploadImgBtn');
+    var imageInput = document.getElementById('cpImageInput');
+
+    // Hàm nén ảnh bằng Canvas của trình duyệt
+    function resizeImage(file, maxSize = 1200) {
+        return new Promise((resolve) => {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var width = img.width;
+                    var height = img.height;
+
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = Math.round((height * maxSize) / width);
+                            width = maxSize;
+                        } else {
+                            width = Math.round((width * maxSize) / height);
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob(function(blob) {
+                        resolve(blob);
+                    }, 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (uploadImgBtn && imageInput) {
+        uploadImgBtn.addEventListener('click', function() {
+            if (!currentUser) { alert('Vui lòng đăng nhập để sử dụng!'); return; }
+            
+            var isExpired = checkIsExpired();
+            if (isExpired) {
+                alert('Tài khoản đã hết hạn. Vui lòng gia hạn để dịch ảnh!');
+                return;
+            }
+            if (currentUser.role !== 'super_admin' && !currentUser.isPermanent && (myTokenQuota + myBonusTokens - myTokensUsed <= 0)) { 
+                alert('Bạn đã hết token, vui lòng mua thêm để dịch ảnh!'); 
+                return; 
+            }
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', async function(e) {
+            if (!e.target.files || e.target.files.length === 0) return;
+            
+            var originalFile = e.target.files[0];
+            
+            var originalHTML = uploadImgBtn.innerHTML;
+            uploadImgBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            uploadImgBtn.disabled = true;
+            
+            progressWrap.classList.add('show');
+            progressBar.style.width = '20%';
+            progressText.textContent = 'Đang tối ưu ảnh...';
+
+            try {
+                // Nén ảnh trước khi gửi
+                var resizedBlob = await resizeImage(originalFile, 1200);
+
+                progressBar.style.width = '50%';
+                progressText.textContent = 'Đang nhận diện văn bản...';
+
+                var formData = new FormData();
+                formData.append('image', resizedBlob, 'image.jpg');
+                formData.append('email', currentUser.email);
+
+                var res = await fetch(SERVER_API_URL.replace('/translate', '/translate-image'), {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                var json = await res.json();
+                if (json.error) throw new Error(json.error);
+                
+                // ⭐ SỬ DỤNG original_text THAY VÌ translated
+                inputArea.value = json.original_text;
+                updateCharCount();
+                
+                // ⭐ TỰ ĐỘNG CHUYỂN NÚT NẾU NGÔN NGỮ ẢNH KHÁC VỚI LỰA CHỌN HIỆN TẠI
+                if (json.detected_source === 'zh' && currentMode !== 'zh2vi') {
+                    currentMode = 'zh2vi';
+                    labelVi.classList.remove('active');
+                    labelZh.classList.add('active');
+                    if (!inputArea.disabled) inputArea.placeholder = 'Dán văn bản tiếng Trung vào đây...';
+                } else if (json.detected_source === 'vi' && currentMode !== 'vi2zh') {
+                    currentMode = 'vi2zh';
+                    labelZh.classList.remove('active');
+                    labelVi.classList.add('active');
+                    if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
+                }
+                
+                // ⭐ TRỪ TOKEN VÀ CẬP NHẬT UI NGAY LẬP TỨC (Dùng Number() chống nối chuỗi)
+                if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                    if (typeof json.totalTokensUsed === 'number') {
+                        myTokensUsed = json.totalTokensUsed;
+                    } else {
+                        myTokensUsed += Number(json.tokensUsed);
+                    }
+                    
+                    if (currentUser) {
+                        currentUser.tokensUsed = myTokensUsed;
+                    }
+
+                    try {
+                        var cacheKey = 'user_cache_' + currentUser.email;
+                        var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                        if (cached && cached.data) { 
+                            cached.data.tokensUsed = myTokensUsed; 
+                            localStorage.setItem(cacheKey, JSON.stringify(cached)); 
+                        }
+                    } catch(e) {}
+
+                    renderTokenUI(checkIsExpired());
+                }
+
+                // ⭐ THÔNG BÁO ĐÚNG BẢN CHẤT (ĐÃ ĐỌC ẢNH, CHƯA DỊCH)
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('✅ Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token). Vui lòng bấm Bắt đầu để dịch!', 'success');
+                } else {
+                    alert('Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token).');
+                }
+                
+            } catch(err) {
+                alert('Lỗi đọc ảnh: ' + err.message);
+            } finally {
+                uploadImgBtn.innerHTML = originalHTML;
+                uploadImgBtn.disabled = false;
+                imageInput.value = '';
+                progressWrap.classList.remove('show');
+                progressBar.style.width = '0%';
             }
         });
     }
