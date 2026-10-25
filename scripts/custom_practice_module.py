@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-custom_practice_module.py - Tích hợp Modal Popup cảnh báo lỗi chính tả trực quan
+custom_practice_module.py - Tích hợp Modal Popup cảnh báo lỗi chính tả trực quan & Trợ lý dịch thuật
 """
 
 def build_custom_practice_css():
@@ -74,6 +74,13 @@ def build_custom_practice_css():
 }
 .cp-token-badge.warn { background: rgba(245, 158, 11, 0.1); color: #d97706; border-color: rgba(245, 158, 11, 0.2); }
 .cp-token-badge.danger { background: rgba(220, 38, 38, 0.1); color: #dc2626; border-color: rgba(220, 38, 38, 0.2); }
+
+.cp-token-badge.cooldown {
+    background: rgba(100, 116, 139, 0.15) !important;
+    color: #64748b !important;
+    border-color: rgba(100, 116, 139, 0.3) !important;
+    cursor: not-allowed !important;
+}
 
 .cp-btn-reset {
     padding: 0.45rem 0.9rem;
@@ -503,14 +510,14 @@ def build_custom_practice_js():
     var myTokenQuota = 0;
     var myBonusTokens = 0;
     var currentUser = null;
-    var lastDeletedText = ''; // ⭐ Biến lưu văn bản vừa xoá
+    var lastDeletedText = '';
     var resolveModalAction = null;
     var cachedHistoryData = [];
     var currentTodayCount = 0;
     var isUserAdmin = false;
-    var currentReadRemain = 100;
+    var currentReadRemain = 250;
     
-    var TOKEN_REFRESH_COOLDOWN = 60000;
+    var TOKEN_REFRESH_COOLDOWN = 60000; // 60 giây Cooldown
     var lastTokenRefreshTime = 0;
     var isTokenRefreshing = false;
     var cooldownTimerInterval = null;
@@ -547,21 +554,12 @@ def build_custom_practice_js():
 
     function updateCooldownUI() {
         if (!tokenText || !tokenBadge) return;
-        
         var now = Date.now();
         var timeSinceLastRefresh = now - lastTokenRefreshTime;
         
         if (lastTokenRefreshTime === 0 || timeSinceLastRefresh >= TOKEN_REFRESH_COOLDOWN) {
             tokenBadge.classList.remove('cooldown');
             tokenBadge.style.cursor = 'pointer';
-            
-            if (currentUser && !isTokenRefreshing) {
-                var totalAvailable = myTokenQuota + myBonusTokens;
-                var remain = totalAvailable - myTokensUsed;
-                if (remain < 0) remain = 0;
-                tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
-            }
-            
             if (cooldownTimerInterval) {
                 clearInterval(cooldownTimerInterval);
                 cooldownTimerInterval = null;
@@ -569,15 +567,8 @@ def build_custom_practice_js():
             return;
         }
         
-        var remainMs = TOKEN_REFRESH_COOLDOWN - timeSinceLastRefresh;
-        var remainSec = Math.ceil(remainMs / 1000);
-        
         tokenBadge.classList.add('cooldown');
         tokenBadge.style.cursor = 'not-allowed';
-        
-        if (!isTokenRefreshing) {
-            tokenText.textContent = '⏳ Đợi ' + remainSec + 's';
-        }
     }
 
     function startCooldownTimer() {
@@ -609,15 +600,13 @@ def build_custom_practice_js():
             return;
         }
 
-        // Nếu là isPermanent thì không giới hạn
         if (user.role === 'super_admin' || user.isPermanent) {
             tokenText.textContent = 'Không giới hạn';
             tokenBadge.className = 'cp-token-badge';
             return;
         } else {
-            // Nếu user là admin thì hiển thị 20.000, user thường 10.000
             var defaultQuota = (user.role === 'admin') ? 20000 : 10000;
-            myTokenQuota = defaultQuota;
+            myTokenQuota = user.tokenQuota || defaultQuota;
         }
 
         myBonusTokens = user.bonusTokens || 0;
@@ -626,14 +615,11 @@ def build_custom_practice_js():
         var isExpired = checkIsExpired();
         renderTokenUI(isExpired);
 
-        refreshTokenFromFirestore().catch(function() {});
-
         try {
             var savedRefreshTime = parseInt(localStorage.getItem('cp_last_token_refresh') || '0');
             if (savedRefreshTime > 0) {
                 lastTokenRefreshTime = savedRefreshTime;
                 var timePassed = Date.now() - savedRefreshTime;
-                
                 if (timePassed < TOKEN_REFRESH_COOLDOWN) {
                     startCooldownTimer();
                 } else {
@@ -644,8 +630,8 @@ def build_custom_practice_js():
         } catch(e) {}
     }
 
+    // ⭐ HÀM GỌI API SERVER ĐỂ CHECK TOKEN
     async function refreshTokenFromFirestore() {
-        // ⭐ Gọi API check-token của Server để kích hoạt logic reset ngày/tháng
         if (!currentUser || !currentUser.email) return false;
         
         try {
@@ -658,13 +644,11 @@ def build_custom_practice_js():
             
             if (!json.ok) return false;
             
-            // Cập nhật lại dữ liệu từ Server trả về
             myTokenQuota = json.quota;
             myBonusTokens = json.bonus;
             myTokensUsed = json.used;
             currentUser.role = json.role;
             
-            // Lưu lại vào localStorage
             try {
                 var cacheKey = 'user_cache_' + currentUser.email;
                 var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
@@ -680,18 +664,16 @@ def build_custom_practice_js():
                 }
             } catch(e) {}
             
-            // Vẽ lại UI
             var isExpired = checkIsExpired();
             renderTokenUI(isExpired);
             return true;
         } catch(e) {
-            console.error('Lỗi cập nhật token:', e);
+            console.error('Lỗi gọi API check-token:', e);
             return false;
         }
     }
 
     function renderTokenUI(isExpired) {
-        // ⭐ CHẶN HIỂN THỊ TOKEN KHI CHƯA ĐĂNG NHẬP
         if (!currentUser) {
             tokenText.textContent = 'Chưa đăng nhập';
             tokenBadge.className = 'cp-token-badge warn';
@@ -714,10 +696,9 @@ def build_custom_practice_js():
                 historyBtnEl.title = 'Vui lòng đăng nhập';
                 historyBtnEl.innerHTML = '<i class="fas fa-lock"></i>';
             }
-            return; // Dừng ngay, không chạy xuống phần tính toán token
+            return;
         }
 
-        // ⭐ XỬ LÝ CHO SUPER ADMIN / PREMIUM
         if (currentUser.role === 'super_admin' || currentUser.isPermanent) {
             tokenText.textContent = 'Không giới hạn';
             tokenBadge.className = 'cp-token-badge';
@@ -725,14 +706,12 @@ def build_custom_practice_js():
             tokenBadge.style.opacity = '1';
             tokenBadge.title = 'Bấm để cập nhật số Token mới nhất';
             
-            // Đảm bảo các nút mở khóa cho admin
             startBtn.classList.remove('cp-hidden');
             buyTokenBtn.classList.add('cp-hidden');
             inputArea.disabled = false;
             return;
         }
 
-        // ⭐ TÍNH TOÁN TOKEN
         var totalAvailable = myTokenQuota + myBonusTokens;
         var remain = totalAvailable - myTokensUsed;
         if (remain < 0) remain = 0;
@@ -740,7 +719,6 @@ def build_custom_practice_js():
         tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
         tokenBadge.classList.remove('warn', 'danger');
         
-        // ⭐ XỬ LÝ NÚT LỊCH SỬ
         var historyBtnEl = document.getElementById('cpHistoryBtn');
         if (historyBtnEl) {
             if (isExpired) {
@@ -758,7 +736,6 @@ def build_custom_practice_js():
             }
         }
 
-        // ⭐ XỬ LÝ KHI HẾT HẠN
         if (isExpired) {
             tokenBadge.classList.add('danger');
             tokenBadge.style.pointerEvents = 'none';
@@ -774,7 +751,6 @@ def build_custom_practice_js():
             return; 
         }
 
-        // ⭐ XỬ LÝ KHI CÒN HẠN (Mở khóa nút Refresh)
         tokenBadge.style.pointerEvents = 'auto';
         tokenBadge.style.opacity = '1';
         tokenBadge.title = 'Bấm để cập nhật số Token mới nhất';
@@ -782,7 +758,6 @@ def build_custom_practice_js():
         if (remain <= 2000) tokenBadge.classList.add('danger');
         else if (remain <= 5000) tokenBadge.classList.add('warn');
 
-        // ⭐ KIỂM TRA SỐ DƯ TOKEN (Đã xóa điều kiện role admin)
         if (remain <= 0) {
             startBtn.classList.add('cp-hidden');
             buyTokenBtn.classList.remove('cp-hidden');
@@ -799,79 +774,72 @@ def build_custom_practice_js():
         }
     }
 
-    buyTokenBtn.addEventListener('click', async () => {
-    // 1. Kiểm tra đăng nhập
-    if (!currentUser) {
-        if (typeof openLoginModal === 'function') openLoginModal();
-        else alert('Vui lòng đăng nhập để sử dụng tính năng này!');
-        return;
-    }
-
-    // 2. NẾU LÀ ADMIN -> Yêu cầu nhập số lượng & mật khẩu để tự duyệt
-    if (currentUser.role === 'admin') {
-        const amountStr = prompt("Nhập số lượng Token bạn muốn nạp (Ví dụ: 5000):", "5000");
-        if (amountStr === null) return; // Bấm Hủy
-        
-        const amount = parseInt(amountStr, 10);
-        if (isNaN(amount) || amount <= 0) {
-            alert("Số lượng token không hợp lệ!");
+    buyTokenBtn.addEventListener('click', async function() {
+        if (!currentUser) {
+            if (typeof openLoginModal === 'function') openLoginModal();
+            else alert('Vui lòng đăng nhập để sử dụng tính năng này!');
             return;
         }
 
-        const password = prompt(`Nhập MẬT KHẨU DUYỆT để xác nhận nạp ${amount} token:`);
-        if (password === null) return; // Bấm Hủy
+        if (currentUser.role === 'admin') {
+            var amountStr = prompt("Nhập số lượng Token bạn muốn nạp (Ví dụ: 5000):", "5000");
+            if (amountStr === null) return;
+            
+            var amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Số lượng token không hợp lệ!");
+                return;
+            }
 
-        if (!password.trim()) {
-            alert("Vui lòng nhập mật khẩu!");
-            return;
-        }
+            var password = prompt("Nhập MẬT KHẨU DUYỆT để xác nhận nạp " + amount + " token:");
+            if (password === null) return;
 
-        const originalText = buyTokenBtn.innerHTML;
-        buyTokenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang duyệt...';
-        buyTokenBtn.disabled = true;
+            if (!password.trim()) {
+                alert("Vui lòng nhập mật khẩu!");
+                return;
+            }
 
-        try {
-            const apiUrl = SERVER_API_URL.replace('/translate', '/admin/approve-token');
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    admin_email: currentUser.email,
-                    target_email: currentUser.email, // Tự nạp cho chính mình
-                    amount,
-                    password
-                })
-            });
+            var originalText = buyTokenBtn.innerHTML;
+            buyTokenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang duyệt...';
+            buyTokenBtn.disabled = true;
 
-            const json = await res.json();
+            try {
+                var apiUrl = SERVER_API_URL.replace('/translate', '/admin/approve-token');
+                var res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_email: currentUser.email,
+                        target_email: currentUser.email,
+                        amount: amount,
+                        password: password
+                    })
+                });
 
-            if (!res.ok) {
-                alert(`❌ Lỗi: ${json.error || "Không thể duyệt token"}`);
-            } else {
-                if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast(`✅ ${json.message}`, 'success');
+                var json = await res.json();
+
+                if (!res.ok) {
+                    alert("❌ Lỗi: " + (json.error || "Không thể duyệt token"));
                 } else {
-                    alert(`✅ ${json.message}`);
-                }
-                
-                // Cập nhật lại số dư token trên giao diện nếu hàm tồn tại
-                if (typeof refreshTokenFromFirestore === 'function') {
+                    if (typeof showUserChangedToast === 'function') {
+                        showUserChangedToast("✅ " + json.message, 'success');
+                    } else {
+                        alert("✅ " + json.message);
+                    }
                     await refreshTokenFromFirestore();
                 }
+            } catch (e) {
+                alert("Lỗi kết nối Server: " + e.message);
+            } finally {
+                buyTokenBtn.innerHTML = originalText;
+                buyTokenBtn.disabled = false;
             }
-        } catch (e) {
-            alert(`Lỗi kết nối Server: ${e.message}`);
-        } finally {
-            buyTokenBtn.innerHTML = originalText;
-            buyTokenBtn.disabled = false;
+            return;
         }
-        return;
-    }
 
-    // 3. NẾU LÀ USER THƯỜNG -> Mở modal thanh toán
-    if (typeof openRenewalModal === 'function') openRenewalModal();
-    else alert('Vui lòng liên hệ Admin để gia hạn tài khoản!');
-});
+        if (typeof openRenewalModal === 'function') openRenewalModal();
+        else alert('Vui lòng liên hệ Admin để gia hạn tài khoản!');
+    });
 
     function autoResizeTextarea() {
         inputArea.style.height = 'auto';
@@ -942,8 +910,6 @@ def build_custom_practice_js():
 
     inputArea.addEventListener('input', function() {
         updateCharCount();
-        
-        // ⭐ Nếu người dùng tự gõ nội dung mới, huỷ bộ nhớ tạm
         if (lastDeletedText !== '') {
             lastDeletedText = '';
             resetBtn.innerHTML = '<i class="fas fa-rotate-right"></i>';
@@ -971,6 +937,7 @@ def build_custom_practice_js():
         updateCharCount();
     });
 
+    // ⭐ SỰ KIỆN NÚT LÀM MỚI (Xử lý xỉa văn bản / Khôi phục / Gọi API Check Token & Cooldown 60s)
     resetBtn.addEventListener('click', async function() {
         var currentText = inputArea.value;
 
@@ -1015,17 +982,33 @@ def build_custom_practice_js():
                 return;
             }
 
-            // 1. Đổi icon thành đang tải và KHÓA nút
+            var now = Date.now();
+            var timeSinceLastRefresh = now - lastTokenRefreshTime;
+            if (timeSinceLastRefresh < TOKEN_REFRESH_COOLDOWN) {
+                var waitSec = Math.ceil((TOKEN_REFRESH_COOLDOWN - timeSinceLastRefresh) / 1000);
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('⏳ Vui lòng đợi ' + waitSec + ' giây nữa mới kiểm tra lại', 'warn');
+                } else {
+                    alert('⏳ Vui lòng đợi ' + waitSec + ' giây nữa mới kiểm tra lại');
+                }
+                return;
+            }
+
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
             resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             tokenText.textContent = 'Đang kiểm tra...';
 
-            // 2. Gọi API lấy token mới từ Server
             var ok = await refreshTokenFromFirestore();
             
-            // 3. Cập nhật giao diện ngay lập tức
+            resetBtn.innerHTML = originalHTML;
+            resetBtn.disabled = false;
+
             if (ok) {
+                lastTokenRefreshTime = Date.now();
+                try { localStorage.setItem('cp_last_token_refresh', String(lastTokenRefreshTime)); } catch(e) {}
+                startCooldownTimer();
+
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
                 }
@@ -1035,17 +1018,9 @@ def build_custom_practice_js():
                 }
                 tokenText.textContent = 'Lỗi mạng';
             }
-
-            // 4. Bắt đầu khóa nút 60s (Không hiện đếm ngược, chỉ hiện icon xoay vòng mờ đi)
-            resetBtn.innerHTML = originalHTML; // Trả lại icon xoay vòng ban đầu
-            
-            // Đặt thời gian chờ 60s
-            setTimeout(function() {
-                resetBtn.disabled = false; // Mở khóa nút sau 60s
-                resetBtn.title = 'Làm mới / Kiểm tra Token';
-            }, 60000);
         }
     });
+
     function showSpellModal(words) {
         return new Promise(function(resolve) {
             modalWordsList.textContent = words.join(', ');
@@ -1091,7 +1066,6 @@ def build_custom_practice_js():
             return;
         }
 
-        // ⭐ KIỂM TRA SỐ DƯ TOKEN (Áp dụng cho cả Admin)
         if (!currentUser.isPermanent && currentUser.role !== 'super_admin' && (myTokenQuota + myBonusTokens - myTokensUsed <= 0)) { 
             alert('Bạn đã hết token! Vui lòng mua thêm hoặc quay lại vào ngày mai (đối với Admin).'); 
             return; 
@@ -1126,7 +1100,7 @@ def build_custom_practice_js():
         var totalTokensThisSession = 0;
         var CHUNK_SIZE = 10;
         var processedCount = 0;
-        var groupId = Date.now(); // ⭐ THÊM DÒNG NÀY: Tạo mã nhóm
+        var groupId = Date.now();
 
         try {
             for (var i = 0; i < total; i += CHUNK_SIZE) {
@@ -1150,7 +1124,7 @@ def build_custom_practice_js():
 
                     customData.push({
                         stt: String(i + j + 1),
-                        groupId: groupId, // ⭐ THÊM DÒNG NÀY
+                        groupId: groupId,
                         zh: zhText,
                         vi: viText,
                         pinyin: pinyinStr,
@@ -1305,14 +1279,9 @@ def build_custom_practice_js():
         if (isUserAdmin) {
             historyCounter.innerHTML = '<span style="color:#059669; font-weight:700;"><i class="fas fa-shield-halved"></i> Admin: Không giới hạn Read/Save</span>';
         } else {
-            // ⭐ Sửa giới hạn Lưu thành 150
             var saveRemain = 150 - currentTodayCount; 
             if (saveRemain < 0) saveRemain = 0;
-            
-            // ⭐ Sửa giới hạn Đọc mặc định thành 250
             var readRemainText = (typeof currentReadRemain !== 'undefined') ? currentReadRemain : 250; 
-            
-            // ⭐ Cập nhật chữ hiển thị: /250 cho lượt đọc và /150 cho lượt lưu
             historyCounter.innerHTML = '📖 Lượt xem hôm nay: <b style="color:' + (readRemainText > 0 ? '#4f46e5' : '#dc2626') + ';">' + readRemainText + '</b>/250 | ⏳ Đã lưu: <b>' + currentTodayCount + '</b>/150';
         }
     }
@@ -1326,7 +1295,6 @@ def build_custom_practice_js():
         
         var html = '';
         cachedHistoryData.forEach(function(item, idx) {
-            // Xử lý thời gian
             var timeDisplay = item.createdAt || '';
             if (timeDisplay) {
                 try {
@@ -1343,15 +1311,10 @@ def build_custom_practice_js():
                 } catch(e) {}
             }
 
-            // ⭐ Lấy STT gốc (nếu DB cũ không có thì dùng idx + 1)
             var sttNumber = item.stt || (idx + 1);
 
-            // ⭐ Bố cục mới: Vòng tròn STT bên trái, nội dung bên phải
             html += '<div class="cp-history-item cp-history-card" style="position:relative; display:flex; align-items:flex-start; gap:8px; cursor:pointer;" data-index="' + idx + '" id="cp-hist-' + (item.id || idx) + '">' +
-                
-                // Vòng tròn đánh số
                 '<div style="display:flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px; box-shadow:0 2px 6px rgba(79,70,229,.3);">' + sttNumber + '</div>' +
-                
                 '<div style="flex:1; min-width:0;">' +
                     '<div class="cp-history-vi">' + (item.text_vi || '') + '</div>' +
                     '<div class="cp-history-zh">' + (item.text_zh || '') + '</div>' +
@@ -1372,7 +1335,6 @@ def build_custom_practice_js():
         });
         historyList.innerHTML = html;
 
-        // ⭐ TÍNH NĂNG MỚI: CLICK ĐÚP (PC) HOẶC TAP (MOBILE) ĐỂ LUYỆN TẬP TỪ CÂU ĐÓ ĐẾN CUỐI
         var cardItems = historyList.querySelectorAll('.cp-history-card');
         cardItems.forEach(function(card) {
             var lastTap = 0;
@@ -1380,7 +1342,6 @@ def build_custom_practice_js():
             var touchStartY = 0;
             var touchStartTime = 0;
 
-            // ⭐ 1. XỬ LÝ CHO MOBILE (Phân biệt Tap và Kéo trượt)
             card.addEventListener('touchstart', function(e) {
                 var touch = e.touches[0];
                 touchStartX = touch.clientX;
@@ -1389,7 +1350,6 @@ def build_custom_practice_js():
             }, { passive: true });
 
             card.addEventListener('touchend', function(e) {
-                // Bỏ qua nếu bấm vào nút Xóa hoặc Luyện tập
                 if (e.target.closest('button')) return;
 
                 var touch = e.changedTouches[0];
@@ -1397,52 +1357,40 @@ def build_custom_practice_js():
                 var touchEndY = touch.clientY;
                 var touchEndTime = Date.now();
 
-                // Tính toán khoảng cách di chuyển và thời gian
                 var distance = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
                 var duration = touchEndTime - touchStartTime;
 
-                // Điều kiện để coi là TAP (chứ không phải vuốt):
-                // - Di chuyển < 10px
-                // - Thời gian chạm < 300ms
                 if (distance < 10 && duration < 300) {
-                    e.preventDefault(); // Ngăn chặn sự kiện click giả lập của trình duyệt
+                    e.preventDefault();
                     triggerPracticeFromIndex(this.getAttribute('data-index'));
                 }
             });
 
-            // ⭐ 2. XỬ LÝ CHO PC (Click đúp)
             card.addEventListener('click', function(e) {
-                // Bỏ qua nếu bấm vào nút Xóa hoặc Luyện tập
                 if (e.target.closest('button')) return;
-                
-                // Nếu đang ở thiết bị cảm ứng, bỏ qua sự kiện click này (vì đã xử lý ở touchend)
                 if (e.pointerType === 'touch' || ('ontouchstart' in window)) return;
 
                 var now = Date.now();
                 var timesince = now - lastTap;
                 
                 if (timesince < 300 && timesince > 0) {
-                    // Click đúp
                     e.preventDefault();
                     e.stopPropagation();
                     triggerPracticeFromIndex(this.getAttribute('data-index'));
                     lastTap = 0;
                 } else {
-                    // Click đơn (chờ xem có click thứ 2 không)
                     lastTap = now;
                 }
             });
         });
 
-        // Hàm xử lý: Load từ câu được chọn đến hết
         function triggerPracticeFromIndex(indexStr) {
             var idx = parseInt(indexStr);
             if (isNaN(idx) || idx < 0) return;
             
-            // Cắt mảng từ idx đến cuối
             var slicedData = cachedHistoryData.slice(idx).map(function(item, i) {
                 return {
-                    stt: item.stt || String(i + 1), // Giữ STT gốc
+                    stt: item.stt || String(i + 1),
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
@@ -1453,15 +1401,10 @@ def build_custom_practice_js():
             });
 
             if (slicedData.length === 0) return;
-
-            // Đóng modal lịch sử
             historyOverlay.classList.remove('show');
-            
-            // Load ra trang chính
             loadDataToPracticeScreen(slicedData);
         }
 
-        // GẮN SỰ KIỆN CHO NÚT "LUYỆN TẬP"
         var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -1470,7 +1413,7 @@ def build_custom_practice_js():
                 if (!targetItem) return;
 
                 var singleData = [{
-                    stt: targetItem.stt || String(idx + 1), // ⭐ Lấy STT gốc
+                    stt: targetItem.stt || String(idx + 1),
                     zh: targetItem.text_zh || '',
                     vi: targetItem.text_vi || '',
                     pinyin: targetItem.pinyin || '',
@@ -1484,7 +1427,6 @@ def build_custom_practice_js():
             });
         });
 
-        // GẮN SỰ KIỆN CHO NÚT "XÓA"
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
             btn.addEventListener('click', async function() {
@@ -1542,7 +1484,7 @@ def build_custom_practice_js():
                 
                 cachedHistoryData = json.history;
                 currentTodayCount = json.todayCount || 0;
-                currentReadRemain = (typeof json.readRemain !== 'undefined') ? json.readRemain : 100;
+                currentReadRemain = (typeof json.readRemain !== 'undefined') ? json.readRemain : 250;
                 isUserAdmin = json.isAdmin || false;
 
                 renderHistoryUI();
@@ -1564,7 +1506,7 @@ def build_custom_practice_js():
             var allPracticeData = [];
             cachedHistoryData.forEach(function(item, idx) {
                 allPracticeData.push({
-                    stt: item.stt || String(idx + 1), // ⭐ Lấy STT gốc
+                    stt: item.stt || String(idx + 1),
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
@@ -1590,27 +1532,24 @@ def build_custom_practice_js():
         });
     }
 
+    // ⭐ SỰ KIỆN NÚT TÁC VỤ TOKEN BADGE (Kiểm tra & Khoá 60s sau khi cập nhật thành công)
     if (tokenBadge) {
         tokenBadge.addEventListener('click', async function() {
             var now = Date.now();
             var timeSinceLastRefresh = now - lastTokenRefreshTime;
             
-            if (isTokenRefreshing || this.classList.contains('refreshing')) return;
-            
             if (timeSinceLastRefresh < TOKEN_REFRESH_COOLDOWN) {
                 var waitSec = Math.ceil((TOKEN_REFRESH_COOLDOWN - timeSinceLastRefresh) / 1000);
                 if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast('⏳ Vui lòng đợi ' + waitSec + ' giây nữa', 'warn');
+                    showUserChangedToast('⏳ Vui lòng đợi ' + waitSec + ' giây nữa mới kiểm tra lại', 'warn');
                 }
                 return;
             }
             
-            isTokenRefreshing = true;
-            lastTokenRefreshTime = now;
-            try { localStorage.setItem('cp_last_token_refresh', String(now)); } catch(e) {}
+            if (isTokenRefreshing || this.classList.contains('refreshing')) return;
             
+            isTokenRefreshing = true;
             this.classList.add('refreshing');
-            this.classList.remove('cooldown');
             var originalText = tokenText.textContent;
             tokenText.textContent = 'Đang cập nhật...';
             
@@ -1620,20 +1559,22 @@ def build_custom_practice_js():
             isTokenRefreshing = false;
             
             if (!ok) {
-                lastTokenRefreshTime = 0;
-                try { localStorage.removeItem('cp_last_token_refresh'); } catch(e) {}
                 tokenText.textContent = originalText;
                 if (typeof showUserChangedToast === 'function') {
                     showUserChangedToast('⚠️ Không thể cập nhật, vui lòng thử lại', 'warn');
                 }
             } else {
-                if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast('✅ Đã cập nhật số dư Token. Đợi 60s để bấm tiếp.', 'success');
-                }
+                lastTokenRefreshTime = Date.now();
+                try { localStorage.setItem('cp_last_token_refresh', String(lastTokenRefreshTime)); } catch(e) {}
                 startCooldownTimer();
+                
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
+                }
             }
         });
     }
+
     setTimeout(initTokenState, 100);
     setTimeout(initTokenState, 1500);
 
