@@ -1343,6 +1343,7 @@ def build_custom_practice_js():
         if (!window.pinyinPro) return text;
 
         try {
+            var rawPinyin = '';
             if (typeof Intl !== 'undefined' && Intl.Segmenter) {
                 var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
                 var result = [];
@@ -1354,9 +1355,18 @@ def build_custom_practice_js():
                         result.push(word);
                     }
                 }
-                return result.join(' ');
+                rawPinyin = result.join(' ');
+            } else {
+                rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
             }
-            return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+
+            // ⭐ DỌN DẸP DẤU CÁCH THỪA QUANH DẤU CÂU
+            return rawPinyin
+                .replace(/\s+([,，.。!！?？;；:：])/g, '$1') // Xóa space TRƯỚC dấu câu
+                .replace(/([,，.。!！?？;；:：])\s+/g, '$1 ') // Đảm bảo SAU dấu câu chỉ có 1 space
+                .replace(/\s+$/g, '') // Xóa space ở cuối cùng của cả câu
+                .replace(/\s{2,}/g, ' '); // Gộp các space bị lặp lại thành 1
+
         } catch (e) {
             return window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
         }
