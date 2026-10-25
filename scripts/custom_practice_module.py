@@ -1873,6 +1873,7 @@ def build_custom_practice_js():
                             currentUser.tokensUsed = myTokensUsed;
                         }
 
+                        // 1. Lưu vào cache local
                         try {
                             var cacheKey = 'user_cache_' + currentUser.email;
                             var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
@@ -1882,8 +1883,35 @@ def build_custom_practice_js():
                             }
                         } catch(e) {}
 
-                        renderTokenUI(checkIsExpired());
-                        setTimeout(function() { renderTokenUI(checkIsExpired()); }, 50);
+                        // 2. Tính toán và gán CỨNG số token vào thanh hiển thị
+                        var totalAvailable = myTokenQuota + myBonusTokens;
+                        var remain = totalAvailable - myTokensUsed;
+                        if (remain < 0) remain = 0;
+                        
+                        // Ép Chrome cập nhật text trực tiếp, không thông qua hàm nào khác
+                        if (tokenText) {
+                            tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
+                        }
+                        
+                        // Ép Chrome đổi màu Badge (để nó bắt buộc phải vẽ lại DOM)
+                        if (remain <= 2000) {
+                            tokenBadge.classList.add('danger');
+                        } else if (remain <= 5000) {
+                            tokenBadge.classList.add('warn');
+                        } else {
+                            tokenBadge.classList.remove('warn', 'danger');
+                        }
+
+                        // 3. Dùng requestAnimationFrame kết hợp setTimeout (Đòn quyết định)
+                        requestAnimationFrame(function() {
+                            if (tokenText) {
+                                tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
+                            }
+                            // Đợi 100ms rồi gọi hàm render tổng thể để đồng bộ mọi thứ khác
+                            setTimeout(function() {
+                                renderTokenUI(checkIsExpired());
+                            }, 100);
+                        });
                     }
 
                     if (typeof showUserChangedToast === 'function') {
