@@ -1883,6 +1883,7 @@ def build_custom_practice_js():
                         } catch(e) {}
 
                         renderTokenUI(checkIsExpired());
+                        setTimeout(function() { renderTokenUI(checkIsExpired()); }, 50);
                     }
 
                     if (typeof showUserChangedToast === 'function') {
