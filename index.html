@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -9040,6 +9043,24 @@ body {
 .header-actions .demo-badge{background:linear-gradient(135deg,#fef3c7,#fde68a)!important;color:#78350f!important;font-weight:800!important;letter-spacing:.04em!important;border:1.5px solid #f59e0b!important;box-shadow:0 2px 8px rgba(245,158,11,.25)!important}
 @media(max-width:768px){.logo{gap:.65rem!important}.logo-icon{width:44px!important;height:44px!important;border-radius:11px!important;font-size:1.15rem!important}.logo-text{gap:3px!important}.logo-text .title{font-size:1.15rem!important}.logo-text .subtitle{font-size:.6rem!important;padding:.2rem .55rem!important;gap:.35rem!important}.header-inner{gap:.5rem!important}.header-actions{gap:.35rem!important}.header-actions .icon-btn{width:34px!important;height:34px!important;font-size:.82rem!important}}
 @media(max-width:400px){.logo-text .subtitle{display:none!important}.logo-icon{width:40px!important;height:40px!important;font-size:1rem!important}.logo-text .title{font-size:1.05rem!important}}
+/* ⭐ ÉP KHỐI PINYIN BỚT BO TRÒN VÀ VUÔNG VẮN HƠN */
+div[class*="pinyin"], 
+span[class*="pinyin"],
+.card-pinyin,
+.pinyin-box {
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    background: rgba(124, 58, 237, 0.05) !important;
+    border: 1px solid rgba(124, 58, 237, 0.15) !important;
+    display: inline-block !important;
+    margin-top: 4px !important;
+}
+
+[data-theme="dark"] div[class*="pinyin"],
+[data-theme="dark"] .card-pinyin {
+    background: rgba(124, 58, 237, 0.15) !important;
+    border-color: rgba(124, 58, 237, 0.3) !important;
+}
 
 /* LOGIN FALLBACK */
 
@@ -13687,19 +13708,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13858,7 +13867,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-robot"></i>
     </div>
