@@ -1862,11 +1862,16 @@ def build_custom_practice_js():
                         if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
                     }
                     
-                                        // ⭐ Đồng bộ token chính xác trực tiếp từ Server ngay lập tức cho mọi trình duyệt
                     if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
-                        await refreshTokenFromFirestore();
-                    }
-
+                        if (typeof json.totalTokensUsed === 'number') {
+                            myTokensUsed = json.totalTokensUsed;
+                        } else {
+                            myTokensUsed += Number(json.tokensUsed);
+                        }
+                        
+                        if (currentUser) {
+                            currentUser.tokensUsed = myTokensUsed;
+                        }
 
                         try {
                             var cacheKey = 'user_cache_' + currentUser.email;
