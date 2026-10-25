@@ -1862,7 +1862,8 @@ def build_custom_practice_js():
                         if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
                     }
                     
-                    if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                                        if (json.tokensUsed > 0 && currentUser.role !== 'admin' && !currentUser.isPermanent) {
+                        // 1. Cập nhật biến cục bộ ngay lập tức để ép hiển thị
                         if (typeof json.totalTokensUsed === 'number') {
                             myTokensUsed = json.totalTokensUsed;
                         } else {
@@ -1873,45 +1874,34 @@ def build_custom_practice_js():
                             currentUser.tokensUsed = myTokensUsed;
                         }
 
-                        // 1. Lưu vào cache local
-                        try {
-                            var cacheKey = 'user_cache_' + currentUser.email;
-                            var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-                            if (cached && cached.data) { 
-                                cached.data.tokensUsed = myTokensUsed; 
-                                localStorage.setItem(cacheKey, JSON.stringify(cached)); 
-                            }
-                        } catch(e) {}
-
-                        // 2. Tính toán và gán CỨNG số token vào thanh hiển thị
+                        // 2. Tính toán và gán trực tiếp vào giao diện (Bắt buộc Chrome phải vẽ lại DOM ngay)
                         var totalAvailable = myTokenQuota + myBonusTokens;
                         var remain = totalAvailable - myTokensUsed;
                         if (remain < 0) remain = 0;
                         
-                        // Ép Chrome cập nhật text trực tiếp, không thông qua hàm nào khác
                         if (tokenText) {
                             tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
                         }
                         
-                        // Ép Chrome đổi màu Badge (để nó bắt buộc phải vẽ lại DOM)
                         if (remain <= 2000) {
                             tokenBadge.classList.add('danger');
+                            tokenBadge.classList.remove('warn');
                         } else if (remain <= 5000) {
                             tokenBadge.classList.add('warn');
+                            tokenBadge.classList.remove('danger');
                         } else {
                             tokenBadge.classList.remove('warn', 'danger');
                         }
 
-                        // 3. Dùng requestAnimationFrame kết hợp setTimeout (Đòn quyết định)
+                        // 3. Ép Chrome render lại khung hình tức thì
                         requestAnimationFrame(function() {
                             if (tokenText) {
                                 tokenText.textContent = remain.toLocaleString('vi-VN') + ' token';
                             }
-                            // Đợi 100ms rồi gọi hàm render tổng thể để đồng bộ mọi thứ khác
-                            setTimeout(function() {
-                                renderTokenUI(checkIsExpired());
-                            }, 100);
                         });
+
+                        // 4. Gọi ngầm đồng bộ từ Server để chuẩn xác 100%
+                        refreshTokenFromFirestore();
                     }
 
                     if (typeof showUserChangedToast === 'function') {
