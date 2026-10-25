@@ -516,9 +516,14 @@ def build_custom_practice_html():
                 <h4 class="cp-modal-title" style="font-size: 1.1rem; color: #1e1b4b; margin:0;"><i class="fas fa-history"></i> Lịch sử dịch gần đây</h4>
                 <div id="cpHistoryCounter" style="font-size: 0.75rem; color: #64748b; margin-top: 2px; font-weight: 600;">Đang tải bộ đếm...</div>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:6px; align-items:center;">
+                <!-- ⭐ NÚT CHỌN TẤT CẢ RA LUYỆN TẬP -->
                 <button id="cpSelectAllHistoryBtn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Chọn tất cả ra luyện tập">
                     <i class="fas fa-check-double"></i> Chọn tất cả
+                </button>
+                <!-- ⭐ NÚT XÓA TẤT CẢ LỊCH SỬ MỚI THÊM -->
+                <button id="cpDeleteAllHistoryBtn" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa tất cả lịch sử">
+                    <i class="fas fa-trash-alt"></i> Xóa tất cả
                 </button>
                 <button id="cpHistoryCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#64748b;"><i class="fas fa-times"></i></button>
             </div>
@@ -527,6 +532,7 @@ def build_custom_practice_html():
         </div>
     </div>
 </div>
+
 
 <!-- ⭐ MODAL CẮT ẢNH (CROPPER) -->
 <div class="cp-modal-overlay" id="cpCropModalOverlay">
@@ -556,6 +562,11 @@ def build_custom_practice_js():
     var MAX_CHARS = 5000;
     var currentMode = 'vi2zh';
     var SERVER_API_URL = 'https://server-vopb.onrender.com/api/translate'; 
+
+    var selectAllHistoryBtn = document.getElementById('cpSelectAllHistoryBtn');
+    var deleteAllHistoryBtn = document.getElementById('cpDeleteAllHistoryBtn'); // ⭐ Khai báo nút mới
+    var historyCounter = document.getElementById('cpHistoryCounter');
+
 
     var inputArea = document.getElementById('cpInputZh');
     var charCount = document.getElementById('cpCharCount');
@@ -1624,6 +1635,55 @@ def build_custom_practice_js():
             loadDataToPracticeScreen(allPracticeData);
         });
     }
+        // ⭐ XỬ LÝ SỰ KIỆN XÓA TẤT CẢ LỊCH SỬ
+    if (deleteAllHistoryBtn) {
+        deleteAllHistoryBtn.addEventListener('click', async function() {
+            if (!cachedHistoryData || cachedHistoryData.length === 0) {
+                alert('Không có lịch sử nào để xóa!');
+                return;
+            }
+
+            var confirmDelete = confirm('⚠️ Bạn có chắc chắn muốn XÓA TẤT CẢ ' + cachedHistoryData.length + ' câu trong lịch sử dịch không?\nThao tác này không thể hoàn tác!');
+            if (!confirmDelete) return;
+
+            var originalHTML = deleteAllHistoryBtn.innerHTML;
+            deleteAllHistoryBtn.disabled = true;
+            deleteAllHistoryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+
+            try {
+                // Lặp qua từng mục và xóa song song trên Firestore
+                var deletePromises = cachedHistoryData.map(function(item) {
+                    if (item.id) {
+                        return fetch(SERVER_API_URL.replace('/translate', '/history/delete'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: currentUser.email, id: item.id })
+                        });
+                    }
+                    return Promise.resolve();
+                });
+
+                await Promise.all(deletePromises);
+
+                // Xóa sạch cache cục bộ và vẽ lại giao diện
+                cachedHistoryData = [];
+                currentTodayCount = 0;
+                renderHistoryUI();
+
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('🗑️ Đã xóa toàn bộ lịch sử dịch!', 'success');
+                } else {
+                    alert('🗑️ Đã xóa toàn bộ lịch sử dịch!');
+                }
+            } catch (e) {
+                alert('Có lỗi xảy ra khi xóa lịch sử: ' + e.message);
+            } finally {
+                deleteAllHistoryBtn.disabled = false;
+                deleteAllHistoryBtn.innerHTML = originalHTML;
+            }
+        });
+    }
+
 
     if (historyCloseBtn) {
         historyCloseBtn.addEventListener('click', function() {
