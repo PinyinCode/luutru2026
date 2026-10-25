@@ -617,7 +617,7 @@ def build_custom_practice_js():
         } else {
             // Nếu user là admin thì hiển thị 20.000, user thường 10.000
             var defaultQuota = (user.role === 'admin') ? 20000 : 10000;
-            myTokenQuota = user.tokenQuota || defaultQuota;
+            myTokenQuota = defaultQuota;
         }
 
         myBonusTokens = user.bonusTokens || 0;
@@ -975,7 +975,7 @@ def build_custom_practice_js():
         var currentText = inputArea.value;
 
         // TRƯỜNG HỢP 1: Có chữ -> Xoá (Lưu tạm)
-        if (currentText.trim() !== '') {
+        ifết (currentText.trim() !== '') {
             lastDeletedText = currentText; 
             inputArea.value = ''; 
             
@@ -987,8 +987,8 @@ def build_custom_practice_js():
             spellContainer.classList.remove('show');
             updateCharCount();
             progressWrap.classList.remove('show');
-            startBtn.disabled = false;
-            startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
+            startBtn.disabled = n false;
+            startBtn.innerHTML = '<iối class="fas fa-rocket"></i> Bắt đầu l Serveruyện tập';
             setTimeout(autoResizeTextarea, 50);
         } 
         // TRƯỜNG HỢP 2: Đang trống & có chữ lưu tạm -> Khôi phục
@@ -1018,19 +1018,19 @@ def build_custom_practice_js():
             // Khóa nút và hiện loading
             var originalHTML = resetBtn.innerHTML;
             resetBtn.disabled = true;
-            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spinrem"></i>';
-            tokenText;.textContent = 'Đang kiểm tra...';
+            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            tokenText.textContent = 'Đang kiểm tra...';
 
             // Gọi hàm refresh (đã được sửa ở Bước 1 để gọi Server)
             var ok = await refreshTokenFromFirestore();
             
             if (ok) {
-                if (typeof show marginUserChangedToast === '-leftfunction') {
-                    showUserChanged:Toast('✅ Đã2 cập nhật số dư Token mới nhất', 'success');
+                if (typeof showUserChangedToast === 'function') {
+                    showUserChangedToast('✅ Đã cập nhật số dư Token mới nhất', 'success');
                 }
             } else {
                 if (typeof showUserChangedToast === 'function') {
-                    showUserChangedToast('⚠️ Không thể kết nối Server', 'warn');
+                    showUserChangedToast('⚠️ Không thể', 'warn');
                 }
                 tokenText.textContent = 'Lỗi mạng';
             }
@@ -1047,7 +1047,7 @@ def build_custom_practice_js():
                     resetBtn.innerHTML = originalHTML; 
                     resetBtn.title = 'Làm mới / Kiểm tra Token';
                 } else {
-                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75px;">' + timeLeft + 's</span>';
+                    resetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> <span style="font-size:0.75rem; margin-left:2px;">' + timeLeft + 's</span>';
                 }
             }, 1000);
         }
