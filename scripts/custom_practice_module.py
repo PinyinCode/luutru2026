@@ -1561,7 +1561,7 @@ def build_custom_practice_js():
             });
         });
 
-        function triggerPracticeFromIndex(indexStr) {
+                function triggerPracticeFromIndex(indexStr) {
             var idx = parseInt(indexStr);
             if (isNaN(idx) || idx < 0) return;
             
@@ -1571,6 +1571,7 @@ def build_custom_practice_js():
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
+                    items: item.items || null, // ⭐ Bổ sung truyền mảng items từ lịch sử sang
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1582,7 +1583,7 @@ def build_custom_practice_js():
             loadDataToPracticeScreen(slicedData);
         }
 
-        var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
+                var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var idx = parseInt(this.getAttribute('data-index'));
@@ -1594,6 +1595,7 @@ def build_custom_practice_js():
                     zh: targetItem.text_zh || '',
                     vi: targetItem.text_vi || '',
                     pinyin: targetItem.pinyin || '',
+                    items: targetItem.items || null, // ⭐ Bổ sung truyền mảng items cho câu đơn lẻ
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1603,6 +1605,7 @@ def build_custom_practice_js():
                 loadDataToPracticeScreen(singleData);
             });
         });
+
 
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
@@ -1673,7 +1676,7 @@ def build_custom_practice_js():
         });
     }
 
-    if (selectAllHistoryBtn) {
+        if (selectAllHistoryBtn) {
         selectAllHistoryBtn.addEventListener('click', function() {
             if (!cachedHistoryData || cachedHistoryData.length === 0) {
                 alert('Không có lịch sử nào để chọn!');
@@ -1687,6 +1690,7 @@ def build_custom_practice_js():
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
+                    items: item.items || null, // ⭐ Bổ sung truyền mảng items khi chọn tất cả
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1697,6 +1701,7 @@ def build_custom_practice_js():
             loadDataToPracticeScreen(allPracticeData);
         });
     }
+
         // ⭐ XỬ LÝ SỰ KIỆN XÓA TẤT CẢ LỊCH SỬ
     if (deleteAllHistoryBtn) {
         deleteAllHistoryBtn.addEventListener('click', async function() {
