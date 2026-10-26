@@ -7613,6 +7613,41 @@ function loadPracticeFull(stt) {
                     '<i class="fas fa-file-excel"></i> Excel: ' + escapeHtml(r.excelRow) +
                     '</span>';
     }
+    // ⭐ TỰ ĐỘNG ẨN BỘ LỌC KHI LÀ "LỊCH SỬ" (subject === 'History' hoặc topic === 'Lịch sử dịch')
+    var isHistory = (r.subject === 'History' || r.topic === 'Lịch sử dịch' || r.subject === 'Lịch sử');
+    
+    var pfFilterRow = document.querySelector('.pf-filter-row');
+    var pfDatasetLabel = document.querySelector('.pf-dataset-label');
+    var pfDatasetSelect = $('pfDatasetSelect');
+    var pfDatasetSearch = document.querySelector('.pf-dataset-search');
+    var pfQuickNav = $('pfQuickNavWrap');
+
+    if (isHistory) {
+        // Ẩn bộ lọc
+        if (pfFilterRow) pfFilterRow.style.setProperty('display', 'none', 'important');
+        if (pfDatasetLabel) pfDatasetLabel.style.setProperty('display', 'none', 'important');
+        if (pfDatasetSelect) pfDatasetSelect.style.setProperty('display', 'none', 'important');
+        if (pfDatasetSearch) pfDatasetSearch.style.setProperty('display', 'none', 'important');
+        
+        // Làm gọn ô chọn câu
+        if (pfQuickNav) {
+            pfQuickNav.style.borderTop = 'none';
+            pfQuickNav.style.paddingTop = '0';
+            pfQuickNav.style.marginTop = '0';
+        }
+    } else {
+        // Hiện lại bình thường nếu là câu khác
+        if (pfFilterRow) pfFilterRow.style.display = '';
+        if (pfDatasetLabel) pfDatasetLabel.style.display = '';
+        if (pfDatasetSelect) pfDatasetSelect.style.display = '';
+        if (pfDatasetSearch) pfDatasetSearch.style.display = '';
+        
+        if (pfQuickNav) {
+            pfQuickNav.style.borderTop = '';
+            pfQuickNav.style.paddingTop = '';
+            pfQuickNav.style.marginTop = '';
+        }
+    }
     $('pfTags').innerHTML = tagsHtml;
     $('pfVi').textContent = pfCurrentVi;
     $('pfInput').value = '';
