@@ -1021,7 +1021,65 @@ def build_custom_practice_js():
         checkSpellingSuggestions();
     }
 
+        // ⭐ Hàm tự động nhận diện ngôn ngữ và gạt nút phù hợp
+    function autoDetectAndSwitchLanguage() {
+        var text = inputArea.value;
+        if (!text || text.trim() === '') return;
+
+        var hasChinese = /[\u4e00-\u9fa5]/.test(text);
+
+        if (hasChinese && currentMode !== 'zh2vi') {
+            currentMode = 'zh2vi';
+            labelVi.classList.remove('active');
+            labelZh.classList.add('active');
+            spellContainer.classList.remove('show');
+            if (!inputArea.disabled) {
+                inputArea.placeholder = '输入或粘贴中文文本，让翻译助手帮您搞定...';
+            }
+        } else if (!hasChinese && currentMode !== 'vi2zh') {
+            var hasLatin = /[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềếểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸ]/.test(text);
+            if (hasLatin) {
+                currentMode = 'vi2zh';
+                labelZh.classList.remove('active');
+                labelVi.classList.add('active');
+                if (!inputArea.disabled) {
+                    inputArea.placeholder = 'Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn...';
+                }
+            }
+        }
+    }
+        // ⭐ Hàm tự động nhận diện ngôn ngữ và gạt nút phù hợp
+    function autoDetectAndSwitchLanguage() {
+        var text = inputArea.value;
+        if (!text || text.trim() === '') return;
+
+        var hasChinese = /[\u4e00-\u9fa5]/.test(text);
+
+        if (hasChinese && currentMode !== 'zh2vi') {
+            currentMode = 'zh2vi';
+            labelVi.classList.remove('active');
+            labelZh.classList.add('active');
+            spellContainer.classList.remove('show');
+            if (!inputArea.disabled) {
+                inputArea.placeholder = '输入或粘贴中文文本，让翻译助手帮您搞定...';
+            }
+        } else if (!hasChinese && currentMode !== 'vi2zh') {
+            // Kiểm tra xem có phải ký tự tiếng Việt / Latin không trước khi đổi về vi2zh
+            var hasLatin = /[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềếểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸ]/.test(text);
+            if (hasLatin) {
+                currentMode = 'vi2zh';
+                labelZh.classList.remove('active');
+                labelVi.classList.add('active');
+                if (!inputArea.disabled) {
+                    inputArea.placeholder = 'Nhập hoặc dán văn bản để Trợ lý dịch giúp bạn...';
+                }
+            }
+        }
+    }
+
+
     inputArea.addEventListener('input', function() {
+        autoDetectAndSwitchLanguage(); // ⭐ Gọi tự động nhận diện ngôn ngữ khi gõ hoặc dán văn bản
         updateCharCount();
         if (lastDeletedText !== '') {
             lastDeletedText = '';
@@ -1031,6 +1089,7 @@ def build_custom_practice_js():
             resetBtn.style.borderColor = '';
         }
     });
+
     setTimeout(updateCharCount, 200);
 
     switchBtn.addEventListener('click', function() {
