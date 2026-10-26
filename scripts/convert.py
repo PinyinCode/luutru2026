@@ -408,11 +408,23 @@ body div[class*="pinyin"] {
     border-radius: 6px !important;
     padding: 6px 14px !important;
     margin-top: 8px !important;
-    display: inline-block !important;
     background: rgba(124, 58, 237, 0.06) !important;
     border: 1px solid rgba(124, 58, 237, 0.2) !important;
     color: var(--primary-dark, #4c1d95) !important;
     font-weight: 600 !important;
+    /* ⭐ KHÔNG khai báo display ở đây nữa! */
+}
+
+/* ⭐ Chỉ hiển thị khi body có class show-pinyin */
+body.show-pinyin .card-pinyin,
+body.show-pinyin div[class*="pinyin"] {
+    display: inline-block !important;
+}
+
+/* ⭐ Ẩn khi KHÔNG có class show-pinyin */
+body:not(.show-pinyin) .card-pinyin,
+body:not(.show-pinyin) div[class*="pinyin"] {
+    display: none !important;
 }
 
 [data-theme="dark"] body .card .card-pinyin,
