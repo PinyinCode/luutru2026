@@ -6,6 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
@@ -13714,19 +13717,7 @@ body.has-floating-group #quickSearchRoot{
 }
 
 </style>
-
-    <meta name="keywords" content="tiếng trung văn phòng, tiếng trung công xưởng, học tiếng trung miễn phí, từ vựng tiếng trung">
-    <meta name="author" content="Tuhoctiengtrung.org">
-    <link rel="canonical" href="https://tuhoctiengtrung.org/">
-    <meta property="og:title" content="Học tiếng Trung · Văn phòng & Công xưởng">
-    <meta property="og:description" content="Học tiếng Trung giao tiếp Văn phòng & Công xưởng miễn phí. Tổng hợp từ vựng, mẫu câu thông dụng, luyện viết chữ Hán và phát âm chuẩn.">
-    <meta property="og:url" content="https://tuhoctiengtrung.org/">
-    <meta property="og:type" content="website">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Học Tiếng Trung">
-    <meta name="theme-color" content="#7c3aed">
-  </head>
+</head>
 <body>
 
 <div class="page-wrap">
@@ -13885,7 +13876,7 @@ body.has-floating-group #quickSearchRoot{
 
 
 <!-- QUICK INTRO BANNER — Giới thiệu Trợ lý Dịch thuật AI -->
-<div class="quick-intro-banner" id="quickIntroBanner" data-nosnippet>
+<div class="quick-intro-banner" id="quickIntroBanner">
     <div class="qib-icon">
         <i class="fas fa-robot"></i>
     </div>
@@ -39237,7 +39228,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
         return result;
     }
 
-    startBtn.addEventListener('click', async function() {
+        startBtn.addEventListener('click', async function() {
         if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
 
         var isExpired = checkIsExpired();
@@ -39295,13 +39286,37 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
 
                 var translatedChunk = data.translated.split(/\n?\[\s*---\s*\]\n?/);
 
+                // ⭐ Phân tách mảng items từ server theo các vạch ngăn cách [---]
+                var allItems = data.items || [];
+                var sentenceItemsList = [];
+                var currentGroup = [];
+                for (var k = 0; k < allItems.length; k++) {
+                    var itm = allItems[k];
+                    if (itm.text && itm.text.indexOf('---') !== -1) {
+                        sentenceItemsList.push(currentGroup);
+                        currentGroup = [];
+                    } else {
+                        currentGroup.push(itm);
+                    }
+                }
+                sentenceItemsList.push(currentGroup);
+
                 for (var j = 0; j < chunk.length; j++) {
                     var originalSentence = chunk[j];
                     var transSentence = translatedChunk[j] ? translatedChunk[j].trim() : originalSentence;
 
                     var zhText = currentMode === 'vi2zh' ? transSentence : originalSentence;
                     var viText = currentMode === 'vi2zh' ? originalSentence : transSentence;
-                    var pinyinStr = getSmartPinyin(zhText);
+
+                    // ⭐ Lấy items và pinyin chuẩn từ server (jieba), fallback về getSmartPinyin nếu thiếu
+                    var sItems = sentenceItemsList[j] || null;
+                    var pinyinStr = '';
+                    if (sItems && sItems.length > 0) {
+                        pinyinStr = sItems.map(function(it) { return it.pinyin || it.text; }).filter(Boolean).join(' ');
+                    }
+                    if (!pinyinStr) {
+                        pinyinStr = getSmartPinyin(zhText);
+                    }
 
                     customData.push({
                         stt: String(i + j + 1),
@@ -39309,6 +39324,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                         zh: zhText,
                         vi: viText,
                         pinyin: pinyinStr,
+                        items: sItems, // ⭐ Đính kèm mảng items phân đoạn từ jieba cho từng câu
                         hsk: 'HSK1',
                         topic: 'Văn bản tự do',
                         subject: 'Custom'
@@ -39354,6 +39370,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             finishProcess();
         }
     });
+
 
     function loadDataToPracticeScreen(customData) {
         if (typeof window.activateCustomPracticeMode === 'function') {
@@ -39445,8 +39462,10 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
 }
 
 
-    async function fetchTranslate(text, mode) {
+        async function fetchTranslate(text, mode) {
         var translated = '';
+        var pinyinRes = '';
+        var itemsRes = null;
         var tokensUsed = 0;
 
         try {
@@ -39469,12 +39488,19 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             if (json.error) throw new Error(json.error);
             
             translated = json.translated;
+            pinyinRes = json.pinyin || '';
+            itemsRes = json.items || null;
             tokensUsed = json.tokensUsed || 0;
         } catch(e) {
             translated = text; 
         }
         
-        return { translated: translated, tokensUsed: tokensUsed };
+        return { 
+            translated: translated, 
+            pinyin: pinyinRes, 
+            items: itemsRes, 
+            tokensUsed: tokensUsed 
+        };
     }
 
     function updateCounterUI() {
