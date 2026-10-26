@@ -4352,6 +4352,44 @@ function waitForData(callback) {
     }
 }
 /* ═══════════════════════════════════════════════════════════ */
+/* AUTO-FILL DẤU CÂU — Hàm dùng chung cho Flashcard & Practice */
+/* ═══════════════════════════════════════════════════════════ */
+function stripPunctuation(str) {
+    if (!str) return '';
+    return String(str).replace(/[。，！？、；：""''「」『』（）《》〈〉【】〔〕.,!?;:'"()\[\]{}\-~`@#$%^&*+=|\\/<> \n\r\t]/g, '');
+}
+
+function autoFillPunctuation(userInput, correctAnswer) {
+    var cleanUser = stripPunctuation(userInput);
+    var cleanAnswer = stripPunctuation(correctAnswer);
+    
+    if (!cleanAnswer.startsWith(cleanUser)) {
+        return userInput; 
+    }
+
+    var result = '';
+    var userCharCount = 0;
+    
+    for (var i = 0; i < correctAnswer.length; i++) {
+        var char = correctAnswer[i];
+        var isPunctuation = /[。，！？、；：""''「」『』（）《》〈〉【】〔〕.,!?;:'"()\[\]{}\-~`@#$%^&*+=|\\/<> \n\r\t]/.test(char);
+        
+        if (isPunctuation) {
+            if (userCharCount > 0 && (userCharCount < cleanAnswer.length || i === correctAnswer.length - 1)) {
+                result += char;
+            }
+        } else {
+            if (userCharCount < cleanUser.length) {
+                result += cleanUser[userCharCount];
+                userCharCount++;
+            } else {
+                break;
+            }
+        }
+    }
+    return result;
+}
+/* ═══════════════════════════════════════════════════════════ */
 /* SHOW SEARCH TOAST — Thông báo kết quả tìm kiếm đặc biệt     */
 /* ═══════════════════════════════════════════════════════════ */
 function showSearchToast(message) {
@@ -7316,8 +7354,8 @@ function updateInlinePreview(input, answer) {
         preview.className = 'inline-char-preview';
         input.insertAdjacentElement('afterend', preview);
     }
-    var userVal = input.value.replace(/\s+/g, '');
-    var cleanAnswer = (answer || '').replace(/\s+/g, '');
+    var userVal = stripPunctuation(input.value);
+    var cleanAnswer = stripPunctuation(answer || '');
     if (!cleanAnswer) { preview.innerHTML = ''; return; }
     var html = '';
     var maxLen = Math.max(userVal.length, cleanAnswer.length);
@@ -7420,9 +7458,19 @@ function showInlineCheckWithAnswer(input) {
 window.checkInput = function(input) {
     var stt = input.dataset.stt;
     var answer = input.dataset.answer;
+
+    // ⭐ AUTO-FILL DẤU CÂU CHO FLASHCARD
+    if (answer && document.activeElement === input) {
+        var filledValue = autoFillPunctuation(input.value, answer);
+        if (filledValue !== input.value) {
+            input.value = filledValue;
+        }
+    }
+
     var cells = document.querySelectorAll('[data-check-stt="' + stt + '"]');
     var val = input.value.trim();
     updateInlinePreview(input, answer);
+    
     var wrap = input.closest('.card-practice');
     var btn = wrap ? wrap.querySelector('.toggle-check-btn') : null;
     var isVisible = btn && btn.dataset.visible === '1';
@@ -8330,6 +8378,7 @@ function _quickSpeakNormal(token) {
 }
 
 function initPracticeFull() {
+   
     /* ═══════════════════════════════════════════════════════════
        ⬇️ AUTO-GROW TEXTAREA — Ô nhập tự giãn khi gõ câu dài
        ═══════════════════════════════════════════════════════════ */
@@ -8412,8 +8461,20 @@ function initPracticeFull() {
     $('pfRevealBtn').addEventListener('click', revealFullAnswer);
     $('pfHintBtn').addEventListener('click', toggleHint);
 
-    /* Input — update preview + check */
-    $('pfInput').addEventListener('input', function() {
+    /* ═══════════════════════════════════════════════════════════
+       ⭐ INPUT — UPDATE PREVIEW + CHECK + AUTO-FILL DẤU CÂU
+       ═══════════════════════════════════════════════════════════ */
+    $('pfInput').addEventListener('input', function(e) {
+        var isBackspace = e.inputType === 'deleteContentBackward';
+        
+        // Nếu không phải xóa lùi, ta tự động điền dấu câu
+        if (!isBackspace && pfCurrentAnswer) {
+            var filledValue = autoFillPunctuation(this.value, pfCurrentAnswer);
+            if (filledValue !== this.value) {
+                this.value = filledValue;
+            }
+        }
+        
         updateCharPreview();
         checkFullAnswer();
     });
@@ -8463,10 +8524,6 @@ function initPracticeFull() {
 
     /* ═══════════════════════════════════════════════════════════
        KEYBOARD SHORTCUTS
-       - Enter (không shift/ctrl): xuống dòng trong textarea
-       - Ctrl + Arrow: prev / next
-       - R: toggle random
-       - Escape: đóng modal
        ═══════════════════════════════════════════════════════════ */
     document.addEventListener('keydown', function(e) {
         if (!$('practiceFullModal').classList.contains('show')) return;
@@ -8478,8 +8535,6 @@ function initPracticeFull() {
         );
 
         if (e.key === 'Escape') { closePracticeFull(); return; }
-
-        /* Cho phép Enter xuống dòng bình thường trong textarea */
         if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) return;
 
         if (isTyping) return;
@@ -8533,12 +8588,10 @@ function initPracticeFull() {
             });
         }
     }
+    
     (function setupWidthControl() {
     /* ═══════════════════════════════════════════════════════════
        ⭐ NÚT +/- ĐIỀU KHIỂN SCALE (PRACTICE FULL MODE)
-       - Chỉnh --pf-scale → chỉ ảnh hưởng Practice Full
-       - KHÔNG lưu vị trí, mỗi lần mở Full Mode sẽ reset về mặc định
-       - Kéo thả tự do, tự mờ sau 5s không tương tác
        ═══════════════════════════════════════════════════════════ */
     var MIN_SCALE = 0.7;
     var MAX_SCALE = 1.6;
@@ -8553,9 +8606,6 @@ function initPracticeFull() {
 
     if (!btnPlus || !btnMinus || !indicator || !ctrlWrap) return;
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ HÀM RESET VỊ TRÍ VỀ MẶC ĐỊNH (GÓC PHẢI, GIỮA MÀN HÌNH)
-       ═══════════════════════════════════════════════════════════ */
     function resetPosition() {
         ctrlWrap.style.left = 'auto';
         ctrlWrap.style.top = '50%';
@@ -8563,9 +8613,6 @@ function initPracticeFull() {
         ctrlWrap.style.transform = 'translateY(-50%)';
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ KÉO THẢ CỤM NÚT (DRAG & DROP)
-       ═══════════════════════════════════════════════════════════ */
     var isDragging = false;
     var startX, startY;
     var initialX, initialY;
@@ -8624,9 +8671,6 @@ function initPracticeFull() {
     window.addEventListener('touchmove', dragMove, { passive: false });
     window.addEventListener('touchend', dragEnd);
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ XỬ LÝ XOAY MÀN HÌNH — Reset vị trí
-       ═══════════════════════════════════════════════════════════ */
     var lastOrientation = (window.innerWidth > window.innerHeight) ? 'landscape' : 'portrait';
 
     window.addEventListener('resize', function() {
@@ -8638,9 +8682,6 @@ function initPracticeFull() {
         }
     });
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ LOGIC TĂNG GIẢM SCALE (CHỈ ẢNH HƯỞNG --pf-scale)
-       ═══════════════════════════════════════════════════════════ */
     function getSavedUserScale() {
         try {
             var v = parseFloat(localStorage.getItem(STORAGE_KEY));
@@ -8665,7 +8706,6 @@ function initPracticeFull() {
             basePf = parseFloat(rootStyle.getPropertyValue('--pf-scale')) || 1;
         }
 
-        // CHỈ set --pf-scale (không đụng --ui-scale)
         rootStyle.setProperty('--pf-scale', (basePf * userScale).toFixed(3));
 
         indicator.textContent = Math.round(userScale * 100) + '%';
@@ -8704,9 +8744,6 @@ function initPracticeFull() {
     indicator.title = 'Double-click để reset 100%';
     indicator.style.cursor = 'pointer';
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ TỰ ĐỘNG MỜ SAU 5 GIÂY KHÔNG TƯƠNG TÁC
-       ═══════════════════════════════════════════════════════════ */
     var fadeTimer = null;
 
     function resetFadeTimer() {
@@ -8717,27 +8754,20 @@ function initPracticeFull() {
         }, FADE_TIMEOUT);
     }
 
-    // Reset timer khi có tương tác
     ctrlWrap.addEventListener('mousedown', resetFadeTimer);
     ctrlWrap.addEventListener('touchstart', resetFadeTimer, { passive: true });
     ctrlWrap.addEventListener('mouseenter', resetFadeTimer);
     btnPlus.addEventListener('click', resetFadeTimer);
     btnMinus.addEventListener('click', resetFadeTimer);
 
-    // Khởi động timer lần đầu
     resetFadeTimer();
 
-    /* ═══════════════════════════════════════════════════════════
-       ⭐ RESET VỊ TRÍ MỖI KHI MỞ FULL MODE (QUAY LẠI TỪ MÀN HÌNH CHÍNH)
-       ═══════════════════════════════════════════════════════════ */
     var pfModal = document.getElementById('practiceFullModal');
     if (pfModal) {
-        // Theo dõi sự thay đổi class của modal để biết khi nào mở/đóng
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.attributeName === 'class') {
                     if (pfModal.classList.contains('show')) {
-                        // Khi mở Full Mode → reset vị trí + reset fade timer
                         resetPosition();
                         resetFadeTimer();
                     }
@@ -8748,7 +8778,7 @@ function initPracticeFull() {
     }
 
     console.log('[PF Scale] Control setup OK — current userScale: ' + currentScale);
-})();
+    })();
 }
 function pfBuildDatasetSelect() {
     var sel = $('pfDatasetSelect');
