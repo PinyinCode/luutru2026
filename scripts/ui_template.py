@@ -8268,10 +8268,12 @@ function _speakWithHighlightKaraoke(token) {
             _setSpeakBtnState(false);
             return;
         }
+        
         var phrase = phrases[idx];
         var btn = buttons[idx];
         var wrap = wraps[idx];
 
+        // 1. Hiệu ứng Highlight (Vẫn sáng lên dù là dấu câu hay chữ)
         if (btn) btn.classList.add('reading');
         if (wrap) {
             wrap.classList.add('active-wrap');
@@ -8285,7 +8287,25 @@ function _speakWithHighlightKaraoke(token) {
             }
         }
 
-        var u = new SpeechSynthesisUtterance(phrase.text);
+        // 2. Kiểm tra xem cụm này có phải chỉ là dấu câu không
+        var textToSpeak = phrase.text || '';
+        // Regex kiểm tra xem chuỗi có chứa toàn dấu câu, khoảng trắng không
+        var isOnlyPunctuation = /^[。，,！!？?、；;：:""''「」『』（）()《》〈〉【】〔〕.\-~`@#$%^&*+=|\\/<> \n\r\t]+$/.test(textToSpeak);
+
+        if (isOnlyPunctuation) {
+            // NẾU LÀ DẤU CÂU: Không đọc, đợi 100ms cho hiệu ứng sáng, rồi tự động nhảy sang từ tiếp
+            setTimeout(function() {
+                if (btn) btn.classList.remove('reading');
+                if (wrap) wrap.classList.remove('active-wrap');
+                if (token !== window._speakToken) { cleanupAll(); return; }
+                idx++;
+                speakNext(); // Gọi đệ quy để đọc từ tiếp theo
+            }, 150); // 150ms là thời gian bạn muốn dấu câu sáng lên
+            return; // Dừng tại đây, không chạy code đọc bên dưới
+        }
+
+        // 3. Nếu là chữ bình thường -> Đọc âm thanh
+        var u = new SpeechSynthesisUtterance(textToSpeak);
         u.lang = 'zh-CN';
         applyVoiceSettings(u);
 
