@@ -7971,8 +7971,9 @@ function updateCharPreview() {
     var input = $('pfInput');
     var preview = $('pfPreview');
     var userVal = input.value;
-    var cleanUser = userVal.replace(/\s+/g, '');
-    var cleanAnswer = pfCurrentAnswer.replace(/\s+/g, '');
+    // ⭐ Dùng stripPunctuation để thanh preview không lệch do dấu câu
+    var cleanUser = stripPunctuation(userVal);
+    var cleanAnswer = stripPunctuation(pfCurrentAnswer);
     if (!cleanAnswer) { preview.innerHTML = ''; return; }
     var html = '';
     var maxLen = Math.max(cleanUser.length, cleanAnswer.length);
