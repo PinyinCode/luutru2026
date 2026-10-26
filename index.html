@@ -39623,7 +39623,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             });
         });
 
-        function triggerPracticeFromIndex(indexStr) {
+                function triggerPracticeFromIndex(indexStr) {
             var idx = parseInt(indexStr);
             if (isNaN(idx) || idx < 0) return;
             
@@ -39633,6 +39633,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
+                    items: item.items || null, // ⭐ Bổ sung truyền mảng items từ lịch sử sang
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -39644,7 +39645,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             loadDataToPracticeScreen(slicedData);
         }
 
-        var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
+                var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var idx = parseInt(this.getAttribute('data-index'));
@@ -39656,6 +39657,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                     zh: targetItem.text_zh || '',
                     vi: targetItem.text_vi || '',
                     pinyin: targetItem.pinyin || '',
+                    items: targetItem.items || null, // ⭐ Bổ sung truyền mảng items cho câu đơn lẻ
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -39665,6 +39667,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                 loadDataToPracticeScreen(singleData);
             });
         });
+
 
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
@@ -39735,7 +39738,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
         });
     }
 
-    if (selectAllHistoryBtn) {
+        if (selectAllHistoryBtn) {
         selectAllHistoryBtn.addEventListener('click', function() {
             if (!cachedHistoryData || cachedHistoryData.length === 0) {
                 alert('Không có lịch sử nào để chọn!');
@@ -39749,6 +39752,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
+                    items: item.items || null, // ⭐ Bổ sung truyền mảng items khi chọn tất cả
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -39759,6 +39763,7 @@ console.log('[Mnemonic] Module loaded OK — API: ' + VOCAB_API_URL);
             loadDataToPracticeScreen(allPracticeData);
         });
     }
+
         // ⭐ XỬ LÝ SỰ KIỆN XÓA TẤT CẢ LỊCH SỬ
     if (deleteAllHistoryBtn) {
         deleteAllHistoryBtn.addEventListener('click', async function() {
