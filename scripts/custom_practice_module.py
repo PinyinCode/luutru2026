@@ -564,7 +564,7 @@ def build_custom_practice_js():
     var SERVER_API_URL = 'https://server-vopb.onrender.com/api/translate'; 
 
     var selectAllHistoryBtn = document.getElementById('cpSelectAllHistoryBtn');
-    var deleteAllHistoryBtn = document.getElementById('cpDeleteAllHistoryBtn'); // ⭐ Khai báo nút mới
+    var deleteAllHistoryBtn = document.getElementById('cpDeleteAllHistoryBtn');
     var historyCounter = document.getElementById('cpHistoryCounter');
 
 
@@ -596,8 +596,6 @@ def build_custom_practice_js():
     var historyOverlay = document.getElementById('cpHistoryOverlay');
     var historyList = document.getElementById('cpHistoryList');
     var historyCloseBtn = document.getElementById('cpHistoryCloseBtn');
-    var selectAllHistoryBtn = document.getElementById('cpSelectAllHistoryBtn');
-    var historyCounter = document.getElementById('cpHistoryCounter');
 
     var myTokensUsed = 0;
     var myTokenQuota = 0;
@@ -610,7 +608,7 @@ def build_custom_practice_js():
     var isUserAdmin = false;
     var currentReadRemain = 250;
     
-    var TOKEN_REFRESH_COOLDOWN = 60000; // 60 giây Cooldown
+    var TOKEN_REFRESH_COOLDOWN = 60000;
     var lastTokenRefreshTime = 0;
     var isTokenRefreshing = false;
     var cooldownTimerInterval = null;
@@ -625,7 +623,7 @@ def build_custom_practice_js():
     } else {
         loadPinyinPro();
     }
-        // ⭐ XỬ LÝ PHÓNG TO / THU NHỎ TEXTAREA TOÀN MÀN HÌNH
+
     var expandBtn = document.getElementById('cpExpandBtn');
     var inputWrapper = document.getElementById('cpInputWrapper');
     var expandIcon = document.getElementById('cpExpandIcon');
@@ -647,8 +645,6 @@ def build_custom_practice_js():
         });
     }
 
-
-    // ⭐ HÀM KIỂM TRA TRẠNG THÁI HẾT HẠN (Ưu tiên kiểm tra biến toàn cục & banner DOM đầu tiên)
     function checkIsExpired() {
         if (window.APP_TIER === 'expired' || window.APP_TIER === 'expire') return true;
         if (window.isUserExpired === true) return true;
@@ -745,7 +741,6 @@ def build_custom_practice_js():
         } catch(e) {}
     }
 
-    // ⭐ HÀM GỌI API SERVER ĐỂ CHECK TOKEN
     async function refreshTokenFromFirestore() {
         if (!currentUser || !currentUser.email) return false;
         
@@ -969,11 +964,10 @@ def build_custom_practice_js():
         }
     }
 
-        function findSuspiciousWords() {
+    function findSuspiciousWords() {
         if (currentMode !== 'vi2zh') return [];
         var text = inputArea.value;
         
-        // ⭐ Bỏ qua hoàn toàn nếu văn bản chứa chữ Trung Quốc (dù đang ở chế độ nào)
         if (/[\u4e00-\u9fa5]/.test(text)) return [];
 
         var rawWords = text.split(/\s+/);
@@ -987,7 +981,7 @@ def build_custom_practice_js():
 
             var wLower = w.toLowerCase();
             var hasTripleChar = /(.)\1{2,}/.test(wLower);
-            var vowelsRegex = /[aeiouyàáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]/i;
+            var vowelsRegex = /[aeiouyàáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừừứửữựỳýỷỹỵ]/i;
             var hasVowel = vowelsRegex.test(wLower);
 
             if (hasTripleChar || (!hasVowel && w.length >= 4)) {
@@ -996,7 +990,6 @@ def build_custom_practice_js():
         }
         return suspicious;
     }
-
 
     function checkSpellingSuggestions() {
         var suspiciousWords = findSuspiciousWords();
@@ -1057,11 +1050,9 @@ def build_custom_practice_js():
         updateCharCount();
     });
 
-    // ⭐ SỰ KIỆN NÚT LÀM MỚI (Xử lý xỉa văn bản / Khôi phục / Gọi API Check Token & Cooldown 60s)
     resetBtn.addEventListener('click', async function() {
         var currentText = inputArea.value;
 
-        // TRƯỜNG HỢP 1: Có chữ -> Xoá (Lưu tạm)
         if (currentText.trim() !== '') {
             lastDeletedText = currentText; 
             inputArea.value = ''; 
@@ -1078,7 +1069,6 @@ def build_custom_practice_js():
             startBtn.innerHTML = '<i class="fas fa-rocket"></i> Bắt đầu luyện tập';
             setTimeout(autoResizeTextarea, 50);
         } 
-        // TRƯỜNG HỢP 2: Đang trống & có chữ lưu tạm -> Khôi phục
         else if (lastDeletedText !== '') {
             inputArea.value = lastDeletedText; 
             lastDeletedText = ''; 
@@ -1091,7 +1081,6 @@ def build_custom_practice_js():
             updateCharCount();
             setTimeout(autoResizeTextarea, 50);
         } 
-        // TRƯỜNG HỢP 3: Đang trống -> Kiểm tra Token
         else {
             if (!currentUser || !currentUser.email) {
                 alert('Vui lòng đăng nhập để kiểm tra Token!');
@@ -1176,7 +1165,35 @@ def build_custom_practice_js():
         return result;
     }
 
-        startBtn.addEventListener('click', async function() {
+    // ⭐ Hàm phụ trợ tự động cắt từ tiếng Trung bằng Intl.Segmenter và gán Pinyin chuẩn để tránh lỗi dính chữ
+    function getAccuratePracticeItems(zhText, serverItems) {
+        if (serverItems && serverItems.length > 0) {
+            return serverItems;
+        }
+        if (zhText && typeof Intl !== 'undefined' && Intl.Segmenter) {
+            var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+            var result = [];
+            for (var seg of segmenter.segment(zhText)) {
+                var w = seg.segment;
+                if (!w.trim()) continue;
+                var py = '';
+                if (window.pinyinPro && /[\u4e00-\u9fa5]/.test(w)) {
+                    py = window.pinyinPro.pinyin(w, { toneType: 'symbol', separator: '' });
+                } else {
+                    py = w;
+                }
+                result.push({
+                    text: w,
+                    pinyin: py,
+                    type: /[\u4e00-\u9fa5]/.test(w) ? 'phrase' : 'symbol'
+                });
+            }
+            if (result.length > 0) return result;
+        }
+        return [{ text: zhText, pinyin: '', type: 'phrase' }];
+    }
+
+    startBtn.addEventListener('click', async function() {
         if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
 
         var isExpired = checkIsExpired();
@@ -1234,7 +1251,6 @@ def build_custom_practice_js():
 
                 var translatedChunk = data.translated.split(/\n?\[\s*---\s*\]\n?/);
 
-                // ⭐ Phân tách mảng items từ server theo các vạch ngăn cách [---]
                 var allItems = data.items || [];
                 var sentenceItemsList = [];
                 var currentGroup = [];
@@ -1256,11 +1272,14 @@ def build_custom_practice_js():
                     var zhText = currentMode === 'vi2zh' ? transSentence : originalSentence;
                     var viText = currentMode === 'vi2zh' ? originalSentence : transSentence;
 
-                    // ⭐ Lấy items và pinyin chuẩn từ server (jieba), fallback về getSmartPinyin nếu thiếu
                     var sItems = sentenceItemsList[j] || null;
+                    
+                    // ⭐ Đảm bảo sử dụng hàm phân đoạn chuẩn xác chống dính chữ
+                    var accurateItems = getAccuratePracticeItems(zhText, sItems);
+
                     var pinyinStr = '';
-                    if (sItems && sItems.length > 0) {
-                        pinyinStr = sItems.map(function(it) { return it.pinyin || it.text; }).filter(Boolean).join(' ');
+                    if (accurateItems && accurateItems.length > 0) {
+                        pinyinStr = accurateItems.map(function(it) { return it.pinyin || it.text; }).filter(Boolean).join(' ');
                     }
                     if (!pinyinStr) {
                         pinyinStr = getSmartPinyin(zhText);
@@ -1272,7 +1291,7 @@ def build_custom_practice_js():
                         zh: zhText,
                         vi: viText,
                         pinyin: pinyinStr,
-                        items: sItems, // ⭐ Đính kèm mảng items phân đoạn từ jieba cho từng câu
+                        items: accurateItems, // ⭐ Lưu danh sách items đã chuẩn hóa
                         hsk: 'HSK1',
                         topic: 'Văn bản tự do',
                         subject: 'Custom'
@@ -1319,7 +1338,6 @@ def build_custom_practice_js():
         }
     });
 
-
     function loadDataToPracticeScreen(customData) {
         if (typeof window.activateCustomPracticeMode === 'function') {
             window.activateCustomPracticeMode(customData);
@@ -1365,52 +1383,46 @@ def build_custom_practice_js():
     }
 
     function getSmartPinyin(text) {
-    if (!text) return '';
-    if (!window.pinyinPro) return text;
+        if (!text) return '';
+        if (!window.pinyinPro) return text;
 
-    try {
-        var rawPinyin = '';
-        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-            var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
-            var parts = [];
-            for (var seg of segmenter.segment(text)) {
-                var word = seg.segment;
-                if (/[\u4e00-\u9fa5]/.test(word)) {
-                    parts.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
-                } else if (/[\s\n\r\t]+/.test(word)) {
-                    parts.push(' ');
-                } else {
-                    parts.push(word);
+        try {
+            var rawPinyin = '';
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                var segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+                var parts = [];
+                for (var seg of segmenter.segment(text)) {
+                    var word = seg.segment;
+                    if (/[\u4e00-\u9fa5]/.test(word)) {
+                        parts.push(window.pinyinPro.pinyin(word, { toneType: 'symbol', separator: '' }));
+                    } else if (/[\s\n\r\t]+/.test(word)) {
+                        parts.push(' ');
+                    } else {
+                        parts.push(word);
+                    }
                 }
+                rawPinyin = parts.join('');
+            } else {
+                rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
             }
-            // Nối trực tiếp các phần tử thay vì dùng join(' ') để tránh phát sinh khoảng trắng thừa
-            rawPinyin = parts.join('');
-        } else {
-            rawPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+
+            return rawPinyin
+                .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
+                .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+        } catch (e) {
+            var fallbackPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
+            return fallbackPinyin
+                .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
+                .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
+                .replace(/\s+/g, ' ')
+                .trim();
         }
-
-        // ⭐ DỌN DẸP KHOẢNG TRẮNG QUANH DẤU CÂU
-        return rawPinyin
-            // 1. Xóa toàn bộ khoảng trắng nằm trước dấu câu
-            .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
-            // 2. Đảm bảo sau dấu câu có đúng 1 khoảng trắng (nếu phía sau là chữ cái)
-            .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
-            // 3. Gom các khoảng trắng thừa liên tiếp thành 1 khoảng trắng duy nhất và cắt bỏ 2 đầu
-            .replace(/\s+/g, ' ')
-            .trim();
-
-    } catch (e) {
-        var fallbackPinyin = window.pinyinPro.pinyin(text, { toneType: 'symbol', separator: ' ' });
-        return fallbackPinyin
-            .replace(/\s+([,，.。!！?？;；:：])/g, '$1')
-            .replace(/([,，.。!！?？;；:：])([^\s])/g, '$1 $2')
-            .replace(/\s+/g, ' ')
-            .trim();
     }
-}
 
-
-        async function fetchTranslate(text, mode) {
+    async function fetchTranslate(text, mode) {
         var translated = '';
         var pinyinRes = '';
         var itemsRes = null;
@@ -1561,7 +1573,7 @@ def build_custom_practice_js():
             });
         });
 
-                function triggerPracticeFromIndex(indexStr) {
+        function triggerPracticeFromIndex(indexStr) {
             var idx = parseInt(indexStr);
             if (isNaN(idx) || idx < 0) return;
             
@@ -1571,7 +1583,7 @@ def build_custom_practice_js():
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
-                    items: item.items || null, // ⭐ Bổ sung truyền mảng items từ lịch sử sang
+                    items: item.items || null,
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1583,7 +1595,7 @@ def build_custom_practice_js():
             loadDataToPracticeScreen(slicedData);
         }
 
-                var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
+        var singleBtns = historyList.querySelectorAll('.cp-load-single-history');
         singleBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var idx = parseInt(this.getAttribute('data-index'));
@@ -1595,7 +1607,7 @@ def build_custom_practice_js():
                     zh: targetItem.text_zh || '',
                     vi: targetItem.text_vi || '',
                     pinyin: targetItem.pinyin || '',
-                    items: targetItem.items || null, // ⭐ Bổ sung truyền mảng items cho câu đơn lẻ
+                    items: targetItem.items || null,
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1605,7 +1617,6 @@ def build_custom_practice_js():
                 loadDataToPracticeScreen(singleData);
             });
         });
-
 
         var deleteBtns = historyList.querySelectorAll('.cp-delete-single-history');
         deleteBtns.forEach(function(btn) {
@@ -1676,7 +1687,7 @@ def build_custom_practice_js():
         });
     }
 
-        if (selectAllHistoryBtn) {
+    if (selectAllHistoryBtn) {
         selectAllHistoryBtn.addEventListener('click', function() {
             if (!cachedHistoryData || cachedHistoryData.length === 0) {
                 alert('Không có lịch sử nào để chọn!');
@@ -1690,7 +1701,7 @@ def build_custom_practice_js():
                     zh: item.text_zh || '',
                     vi: item.text_vi || '',
                     pinyin: item.pinyin || '',
-                    items: item.items || null, // ⭐ Bổ sung truyền mảng items khi chọn tất cả
+                    items: item.items || null,
                     hsk: 'HSK1',
                     topic: 'Lịch sử dịch',
                     subject: 'History'
@@ -1702,7 +1713,6 @@ def build_custom_practice_js():
         });
     }
 
-        // ⭐ XỬ LÝ SỰ KIỆN XÓA TẤT CẢ LỊCH SỬ
     if (deleteAllHistoryBtn) {
         deleteAllHistoryBtn.addEventListener('click', async function() {
             if (!cachedHistoryData || cachedHistoryData.length === 0) {
@@ -1718,7 +1728,6 @@ def build_custom_practice_js():
             deleteAllHistoryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
 
             try {
-                // Lặp qua từng mục và xóa song song trên Firestore
                 var deletePromises = cachedHistoryData.map(function(item) {
                     if (item.id) {
                         return fetch(SERVER_API_URL.replace('/translate', '/history/delete'), {
@@ -1732,7 +1741,6 @@ def build_custom_practice_js():
 
                 await Promise.all(deletePromises);
 
-                // Xóa sạch cache cục bộ và vẽ lại giao diện
                 cachedHistoryData = [];
                 currentTodayCount = 0;
                 renderHistoryUI();
@@ -1751,7 +1759,6 @@ def build_custom_practice_js():
         });
     }
 
-
     if (historyCloseBtn) {
         historyCloseBtn.addEventListener('click', function() {
             historyOverlay.classList.remove('show');
@@ -1763,7 +1770,6 @@ def build_custom_practice_js():
         });
     }
 
-    // ⭐ SỰ KIỆN NÚT TÁC VỤ TOKEN BADGE (Kiểm tra & Khoá 60s sau khi cập nhật thành công)
     if (tokenBadge) {
         tokenBadge.addEventListener('click', async function() {
             var now = Date.now();
@@ -1805,7 +1811,7 @@ def build_custom_practice_js():
             }
         });
     }
-        // ⭐ Bổ sung hàm tải thư viện Cropper.js động từ CDN
+
     function loadCropperLibrary() {
         if (window.Cropper) return Promise.resolve();
         return new Promise(function(resolve) {
@@ -1822,12 +1828,9 @@ def build_custom_practice_js():
         });
     }
 
-
-       // ⭐ XỬ LÝ DỊCH ẢNH (CÓ NÉN ẢNH ĐỂ TIẾT KIỆM TOKEN)
     var uploadImgBtn = document.getElementById('cpUploadImgBtn');
     var imageInput = document.getElementById('cpImageInput');
     
-    // ⭐ Bổ sung khai báo các biến Modal Crop còn thiếu ở đây:
     var cropperInstance = null;
     var cropModalOverlay = document.getElementById('cpCropModalOverlay');
     var imageToCrop = document.getElementById('cpImageToCrop');
@@ -1835,8 +1838,6 @@ def build_custom_practice_js():
     var cropCancelBtn = document.getElementById('cpCropCancelBtn');
     var cropCloseBtn = document.getElementById('cpCropCloseBtn');
 
-
-    // Hàm nén ảnh bằng Canvas của trình duyệt
     function resizeImage(file, maxSize = 1200) {
         return new Promise((resolve) => {
             var reader = new FileReader();
@@ -1872,7 +1873,7 @@ def build_custom_practice_js():
         });
     }
 
-        if (uploadImgBtn && imageInput) {
+    if (uploadImgBtn && imageInput) {
         uploadImgBtn.addEventListener('click', function() {
             if (!currentUser) { alert('Vui lòng đăng nhập để sử dụng!'); return; }
             
@@ -1889,7 +1890,6 @@ def build_custom_practice_js():
         });
     }
 
-    // ⭐ KHI CHỌN ẢNH -> MỞ MODAL CROP THAY VÌ GỬI LUÔN
     if (imageInput) {
         imageInput.addEventListener('change', async function(e) {
             if (!e.target.files || e.target.files.length === 0) return;
@@ -1912,7 +1912,7 @@ def build_custom_practice_js():
                     }
                     
                     cropperInstance = new Cropper(imageToCrop, {
-                        aspectRatio: NaN, // Tự do kéo cắt mọi tỷ lệ
+                        aspectRatio: NaN,
                         viewMode: 1,
                         autoCropArea: 0.95,
                         responsive: true,
@@ -1931,7 +1931,6 @@ def build_custom_practice_js():
         });
     }
 
-    // ⭐ XÁC NHẬN CẮT, CHUYỂN TRẮNG ĐEN & GỬI LÊN API
     if (cropConfirmBtn) {
         cropConfirmBtn.addEventListener('click', async function() {
             if (!cropperInstance) return;
@@ -1988,13 +1987,10 @@ def build_custom_practice_js():
                         labelVi.classList.add('active');
                         if (!inputArea.disabled) inputArea.placeholder = 'Nhập văn bản tiếng Việt vào đây...';
                     }
-                    
                                       
                     if (json.tokensUsed > 0 && !currentUser.isPermanent) {
                         await refreshTokenFromFirestore();
                     }
-
-
 
                     if (typeof showUserChangedToast === 'function') {
                         showUserChangedToast('✅ Đã đọc ảnh xong (Tốn ' + json.tokensUsed + ' token). Vui lòng bấm Bắt đầu để dịch!', 'success');
@@ -2016,7 +2012,6 @@ def build_custom_practice_js():
             }, 'image/jpeg', 0.75);
         });
     }
-
 
     setTimeout(initTokenState, 100);
     setTimeout(initTokenState, 1500);
