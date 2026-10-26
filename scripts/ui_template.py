@@ -8084,9 +8084,11 @@ function revealFullAnswer() {
         revealBtn.innerHTML = '<i class="fas fa-eye"></i> Xem đáp án';
         return;
     }
+    
     var charsEl = $('pfAnswerChars');
     var pinyinEl = $('pfAnswerPinyin');
     charsEl.innerHTML = '';
+    
     var phrases = splitByPinyin(pfCurrentAnswer, pfCurrentPinyin);
     if (phrases.length === 0) {
         pfCurrentAnswer.split('').forEach(function(c) {
@@ -8094,6 +8096,9 @@ function revealFullAnswer() {
         });
     }
     window._pfPhrases = phrases;
+
+    // Kiểm tra xem có phải thiết bị cảm ứng không
+    var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
     phrases.forEach(function(item, idx) {
         var wrap = document.createElement('span');
@@ -8106,15 +8111,38 @@ function revealFullAnswer() {
         btn.className = 'answer-phrase-btn';
         btn.textContent = item.text;
         btn.title = item.pinyin ? (item.text + ' - ' + item.pinyin) : item.text;
+        
+        // ⭐ SỬA LẠI SỰ KIỆN CLICK
         btn.onclick = (function(text, pinyin, el, wrapEl) {
             return function(e) {
                 e.stopPropagation();
+                
+                // 1. Hiệu ứng zoom
                 el.classList.add('zoom-in');
                 setTimeout(function() { el.classList.remove('zoom-in'); }, 700);
-                togglePhraseTooltip(wrapEl);
+                
+                // 2. Nếu đang đọc Karaoke thì dừng lại
+                if (window._isSpeakingFull) {
+                    stopSpeakFull();
+                }
+
+                // 3. LUÔN BẬT TOOLTIP PINYIN NGAY LẬP TỨC
+                var tip = wrapEl.querySelector('.answer-phrase-tooltip');
+                if (tip) {
+                    // Tắt tất cả tooltip khác trước
+                    document.querySelectorAll('.answer-phrase-tooltip.show').forEach(function(t) {
+                        t.classList.remove('show');
+                    });
+                    // Bật tooltip hiện tại
+                    tip.classList.add('show');
+                    _activeTooltipWrap = wrapEl;
+                }
+
+                // 4. Phát âm thanh
                 speakPhrase(text, el);
             };
         })(item.text, item.pinyin, btn, wrap);
+        
         wrap.appendChild(btn);
 
         var tip = document.createElement('span');
@@ -8122,12 +8150,16 @@ function revealFullAnswer() {
         tip.textContent = item.pinyin || item.text;
         wrap.appendChild(tip);
 
-        if (item.pinyin) {
+        // ⭐ Chỉ dùng hover trên PC, không dùng trên Mobile để tránh bị ẩn tooltip
+        if (item.pinyin && !isTouchDevice) {
             wrap.addEventListener('mouseenter', function() {
                 tip.classList.add('show');
             });
             wrap.addEventListener('mouseleave', function() {
-                tip.classList.remove('show');
+                // Chỉ ẩn nếu không phải đang trong trạng thái active
+                if (_activeTooltipWrap !== wrap) {
+                    tip.classList.remove('show');
+                }
             });
         }
 
@@ -8139,7 +8171,6 @@ function revealFullAnswer() {
     revealBtn.classList.add('revealed');
     revealBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Ẩn đáp án';
 }
-
 window.speakPhrase = function(phrase, btn) {
     if (!canUseFeature()) { showLimitMessage(); return; }
     if (!('speechSynthesis' in window)) { alert('Trình duyệt không hỗ trợ phát âm.'); return; }
