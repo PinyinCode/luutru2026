@@ -3927,7 +3927,11 @@ html body .pf-chip {
     height: 32px !important;
     padding: 0 0.6rem !important;
 }
-
+/* ⭐ ÉP ẨN PINYIN TRONG CHẾ ĐỘ LẮP GHÉP KHI TẮT NÚT AZ */
+body.pf-assemble-active:not(.show-pinyin) [class*="pinyin"],
+body.pf-assemble-active:not(.show-pinyin) .card-pinyin {
+    display: none !important;
+}
 """
 def build_ui_html():
     return r"""
