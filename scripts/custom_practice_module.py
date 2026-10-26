@@ -1176,7 +1176,7 @@ def build_custom_practice_js():
         return result;
     }
 
-    startBtn.addEventListener('click', async function() {
+        startBtn.addEventListener('click', async function() {
         if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
 
         var isExpired = checkIsExpired();
@@ -1234,13 +1234,37 @@ def build_custom_practice_js():
 
                 var translatedChunk = data.translated.split(/\n?\[\s*---\s*\]\n?/);
 
+                // ⭐ Phân tách mảng items từ server theo các vạch ngăn cách [---]
+                var allItems = data.items || [];
+                var sentenceItemsList = [];
+                var currentGroup = [];
+                for (var k = 0; k < allItems.length; k++) {
+                    var itm = allItems[k];
+                    if (itm.text && itm.text.indexOf('---') !== -1) {
+                        sentenceItemsList.push(currentGroup);
+                        currentGroup = [];
+                    } else {
+                        currentGroup.push(itm);
+                    }
+                }
+                sentenceItemsList.push(currentGroup);
+
                 for (var j = 0; j < chunk.length; j++) {
                     var originalSentence = chunk[j];
                     var transSentence = translatedChunk[j] ? translatedChunk[j].trim() : originalSentence;
 
                     var zhText = currentMode === 'vi2zh' ? transSentence : originalSentence;
                     var viText = currentMode === 'vi2zh' ? originalSentence : transSentence;
-                    var pinyinStr = getSmartPinyin(zhText);
+
+                    // ⭐ Lấy items và pinyin chuẩn từ server (jieba), fallback về getSmartPinyin nếu thiếu
+                    var sItems = sentenceItemsList[j] || null;
+                    var pinyinStr = '';
+                    if (sItems && sItems.length > 0) {
+                        pinyinStr = sItems.map(function(it) { return it.pinyin || it.text; }).filter(Boolean).join(' ');
+                    }
+                    if (!pinyinStr) {
+                        pinyinStr = getSmartPinyin(zhText);
+                    }
 
                     customData.push({
                         stt: String(i + j + 1),
@@ -1248,6 +1272,7 @@ def build_custom_practice_js():
                         zh: zhText,
                         vi: viText,
                         pinyin: pinyinStr,
+                        items: sItems, // ⭐ Đính kèm mảng items phân đoạn từ jieba cho từng câu
                         hsk: 'HSK1',
                         topic: 'Văn bản tự do',
                         subject: 'Custom'
@@ -1293,6 +1318,7 @@ def build_custom_practice_js():
             finishProcess();
         }
     });
+
 
     function loadDataToPracticeScreen(customData) {
         if (typeof window.activateCustomPracticeMode === 'function') {
@@ -1384,8 +1410,10 @@ def build_custom_practice_js():
 }
 
 
-    async function fetchTranslate(text, mode) {
+        async function fetchTranslate(text, mode) {
         var translated = '';
+        var pinyinRes = '';
+        var itemsRes = null;
         var tokensUsed = 0;
 
         try {
@@ -1408,12 +1436,19 @@ def build_custom_practice_js():
             if (json.error) throw new Error(json.error);
             
             translated = json.translated;
+            pinyinRes = json.pinyin || '';
+            itemsRes = json.items || null;
             tokensUsed = json.tokensUsed || 0;
         } catch(e) {
             translated = text; 
         }
         
-        return { translated: translated, tokensUsed: tokensUsed };
+        return { 
+            translated: translated, 
+            pinyin: pinyinRes, 
+            items: itemsRes, 
+            tokensUsed: tokensUsed 
+        };
     }
 
     function updateCounterUI() {
